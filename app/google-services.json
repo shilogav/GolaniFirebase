@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "815015468485",
+    "firebase_url": "https://fir-users-d9685.firebaseio.com",
+    "project_id": "fir-users-d9685",
+    "storage_bucket": "fir-users-d9685.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:815015468485:android:d3b04bc77df1794374ffac",
+        "android_client_info": {
+          "package_name": "com.shilo.myloginfirebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "815015468485-ctt3srv8qe2bardedr7omf6h4e0vcf6c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shilo.myloginfirebase",
+            "certificate_hash": "6493db955fb68a1b49a538cccb339935ef79bc20"
+          }
+        },
+        {
+          "client_id": "815015468485-4gmlomjr4fssvdn39kl21q1bpvvkp8o3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEySNdWG11yzsT7kSvwcZCfel_P4rIU8M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "815015468485-4gmlomjr4fssvdn39kl21q1bpvvkp8o3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
