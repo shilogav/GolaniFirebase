@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2020-10-19T18:37:58.692Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36" etag="azlIUiVPdzB2yH90VwbJ" version="13.8.0" type="github">
+<mxfile host="app.diagrams.net" modified="2020-10-19T18:45:55.502Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36" etag="NYM5DSLqpLXXKMjx_oDK" version="13.8.0" type="github">
   <diagram id="GwU3gwyOJ-P_wgo4JuNJ" name="Page-1">
-    <mxGraphModel dx="569" dy="329" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="813" dy="470" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -287,16 +287,22 @@
           <mxGeometry x="39.45" y="161" width="95.56" height="95.56" as="geometry" />
         </mxCell>
         <mxCell id="0CA6CwU94SbijW8DZjsA-60" value="" style="group;rotation=0;align=center;labelPosition=center;verticalLabelPosition=middle;verticalAlign=middle;" parent="0CA6CwU94SbijW8DZjsA-88" vertex="1" connectable="0">
-          <mxGeometry x="6.109999999999999" y="26.880000000000003" width="162.24" height="40" as="geometry" />
+          <mxGeometry x="0.10999999999999943" y="26.880000000000003" width="170" height="40" as="geometry" />
         </mxCell>
         <mxCell id="0CA6CwU94SbijW8DZjsA-61" value="&lt;font color=&quot;#000000&quot;&gt;&lt;span style=&quot;font-size: 12px&quot;&gt;ישראל ישראלי&lt;/span&gt;&lt;/font&gt;" style="text;html=1;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=29;fontColor=#CCCCCC;rotation=0;strokeColor=#000000;labelPosition=center;verticalLabelPosition=middle;spacingBottom=9;" parent="0CA6CwU94SbijW8DZjsA-60" vertex="1">
-          <mxGeometry x="39" y="17" width="80" height="23" as="geometry" />
+          <mxGeometry x="1" y="17" width="170" height="23" as="geometry" />
         </mxCell>
-        <mxCell id="_yhOwiFEZcqqSqBclabc-1" value="&lt;font color=&quot;#000000&quot;&gt;&lt;span style=&quot;font-size: 12px&quot;&gt;ישראל ישראלי&lt;/span&gt;&lt;/font&gt;" style="text;html=1;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=29;fontColor=#CCCCCC;rotation=0;strokeColor=#000000;labelPosition=center;verticalLabelPosition=middle;spacingBottom=9;" vertex="1" parent="0CA6CwU94SbijW8DZjsA-88">
-          <mxGeometry x="44.23000000000002" y="81" width="80" height="23" as="geometry" />
+        <mxCell id="_yhOwiFEZcqqSqBclabc-5" value="" style="group;rotation=0;align=center;labelPosition=center;verticalLabelPosition=middle;verticalAlign=middle;" vertex="1" connectable="0" parent="0CA6CwU94SbijW8DZjsA-88">
+          <mxGeometry x="1.1100000000000136" y="66.32000000000016" width="170" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="_yhOwiFEZcqqSqBclabc-2" value="&lt;font color=&quot;#000000&quot;&gt;&lt;span style=&quot;font-size: 12px&quot;&gt;ישראל ישראלי&lt;/span&gt;&lt;/font&gt;" style="text;html=1;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=29;fontColor=#CCCCCC;rotation=0;strokeColor=#000000;labelPosition=center;verticalLabelPosition=middle;spacingBottom=9;" vertex="1" parent="0CA6CwU94SbijW8DZjsA-88">
-          <mxGeometry x="44.23000000000002" y="117" width="80" height="23" as="geometry" />
+        <mxCell id="_yhOwiFEZcqqSqBclabc-6" value="&lt;font color=&quot;#000000&quot;&gt;&lt;span style=&quot;font-size: 12px&quot;&gt;ישראל ישראלי&lt;/span&gt;&lt;/font&gt;" style="text;html=1;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=29;fontColor=#CCCCCC;rotation=0;strokeColor=#000000;labelPosition=center;verticalLabelPosition=middle;spacingBottom=9;" vertex="1" parent="_yhOwiFEZcqqSqBclabc-5">
+          <mxGeometry y="17" width="170" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="_yhOwiFEZcqqSqBclabc-7" value="" style="group;rotation=0;align=center;labelPosition=center;verticalLabelPosition=middle;verticalAlign=middle;" vertex="1" connectable="0" parent="0CA6CwU94SbijW8DZjsA-88">
+          <mxGeometry x="0.11000000000001364" y="106.32000000000016" width="170" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="_yhOwiFEZcqqSqBclabc-8" value="&lt;font color=&quot;#000000&quot;&gt;&lt;span style=&quot;font-size: 12px&quot;&gt;ישראל ישראלי&lt;/span&gt;&lt;/font&gt;" style="text;html=1;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=29;fontColor=#CCCCCC;rotation=0;strokeColor=#000000;labelPosition=center;verticalLabelPosition=middle;spacingBottom=9;" vertex="1" parent="_yhOwiFEZcqqSqBclabc-7">
+          <mxGeometry x="1" y="17" width="170" height="23" as="geometry" />
         </mxCell>
         <mxCell id="0CA6CwU94SbijW8DZjsA-91" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.532;entryY=-0.005;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=29;fontColor=#CCCCCC;" parent="1" source="_XJdXQDjK6ybq_Vrd5E6-10" target="0CA6CwU94SbijW8DZjsA-54" edge="1">
           <mxGeometry relative="1" as="geometry" />
