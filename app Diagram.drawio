@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2020-10-19T18:30:20.157Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36" etag="32HX-dtrApobqI5vCh8F" version="13.8.0" type="github">
+<mxfile host="app.diagrams.net" modified="2020-10-19T18:36:01.577Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36" etag="80H8fhzO8rw7_H30nIY2" version="13.8.0" type="github">
   <diagram id="GwU3gwyOJ-P_wgo4JuNJ" name="Page-1">
     <mxGraphModel dx="813" dy="470" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -98,7 +98,7 @@
           <mxGeometry x="5" y="56.88" width="190" height="280.88" as="geometry" />
         </mxCell>
         <mxCell id="_XJdXQDjK6ybq_Vrd5E6-34" value="&lt;font&gt;שמור דו&quot;ח&lt;br&gt;&lt;/font&gt;" style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=10;align=center;strokeWidth=2;strokeColor=none;fillColor=#000000;fontColor=#FFFFFF;" parent="_XJdXQDjK6ybq_Vrd5E6-32" vertex="1">
-          <mxGeometry x="35.38" y="300" width="105.5" height="16.88" as="geometry" />
+          <mxGeometry x="35.38" y="283" width="105.5" height="16.88" as="geometry" />
         </mxCell>
         <mxCell id="_XJdXQDjK6ybq_Vrd5E6-38" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shadow=0;dashed=0;strokeWidth=2;shape=mxgraph.android.navigation_bar_1;fillColor=#1A1A1A;fontSize=29;strokeColor=#B3B3B3;" parent="_XJdXQDjK6ybq_Vrd5E6-32" vertex="1">
           <mxGeometry x="3.9" y="330" width="192.5" height="30" as="geometry" />
@@ -127,6 +127,9 @@
         <mxCell id="0CA6CwU94SbijW8DZjsA-13" value="" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://cdn4.iconfinder.com/data/icons/basic-ui-2-line/32/dots-dotted-option-menu-bullet-128.png;strokeColor=#000000;fillColor=#4D4D4D;gradientColor=none;fontSize=29;fontColor=#CCCCCC;align=center;sketch=0;" parent="_XJdXQDjK6ybq_Vrd5E6-32" vertex="1">
           <mxGeometry x="40.35" y="170" width="95.56" height="95.56" as="geometry" />
         </mxCell>
+        <mxCell id="_yhOwiFEZcqqSqBclabc-3" value="&lt;font&gt;ייצא דו&quot;ח&lt;br&gt;&lt;/font&gt;" style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=10;align=center;strokeWidth=2;strokeColor=none;fillColor=#000000;fontColor=#FFFFFF;" vertex="1" parent="_XJdXQDjK6ybq_Vrd5E6-32">
+          <mxGeometry x="35.379999999999995" y="310" width="105.5" height="16.88" as="geometry" />
+        </mxCell>
         <mxCell id="0CA6CwU94SbijW8DZjsA-10" value="" style="group;rotation=0;align=center;labelPosition=center;verticalLabelPosition=middle;verticalAlign=middle;" parent="0CA6CwU94SbijW8DZjsA-14" vertex="1" connectable="0">
           <mxGeometry x="11" y="123" width="156.25" height="30" as="geometry" />
         </mxCell>
@@ -152,7 +155,7 @@
           <mxGeometry x="5" y="56.88" width="190" height="280.88" as="geometry" />
         </mxCell>
         <mxCell id="0CA6CwU94SbijW8DZjsA-20" value="&lt;font&gt;שמור דו&quot;ח&lt;br&gt;&lt;/font&gt;" style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=10;align=center;strokeWidth=2;strokeColor=none;fillColor=#000000;fontColor=#FFFFFF;" parent="0CA6CwU94SbijW8DZjsA-16" vertex="1">
-          <mxGeometry x="35.38" y="300" width="105.5" height="16.88" as="geometry" />
+          <mxGeometry x="35.38" y="283" width="105.5" height="16.88" as="geometry" />
         </mxCell>
         <mxCell id="0CA6CwU94SbijW8DZjsA-21" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shadow=0;dashed=0;strokeWidth=2;shape=mxgraph.android.navigation_bar_1;fillColor=#1A1A1A;fontSize=29;strokeColor=#B3B3B3;" parent="0CA6CwU94SbijW8DZjsA-16" vertex="1">
           <mxGeometry x="3.9" y="330" width="192.5" height="30" as="geometry" />
@@ -180,6 +183,9 @@
         </mxCell>
         <mxCell id="0CA6CwU94SbijW8DZjsA-29" value="" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://cdn4.iconfinder.com/data/icons/basic-ui-2-line/32/dots-dotted-option-menu-bullet-128.png;strokeColor=#000000;fillColor=#4D4D4D;gradientColor=none;fontSize=29;fontColor=#CCCCCC;align=center;sketch=0;" parent="0CA6CwU94SbijW8DZjsA-16" vertex="1">
           <mxGeometry x="40.35" y="170" width="95.56" height="95.56" as="geometry" />
+        </mxCell>
+        <mxCell id="_yhOwiFEZcqqSqBclabc-4" value="&lt;font&gt;ייצא דו&quot;ח&lt;br&gt;&lt;/font&gt;" style="rounded=1;html=1;shadow=0;dashed=0;whiteSpace=wrap;fontSize=10;align=center;strokeWidth=2;strokeColor=none;fillColor=#000000;fontColor=#FFFFFF;" vertex="1" parent="0CA6CwU94SbijW8DZjsA-16">
+          <mxGeometry x="35.379999999999995" y="310" width="105.5" height="16.88" as="geometry" />
         </mxCell>
         <mxCell id="0CA6CwU94SbijW8DZjsA-30" value="" style="group;rotation=0;align=center;labelPosition=center;verticalLabelPosition=middle;verticalAlign=middle;" parent="0CA6CwU94SbijW8DZjsA-15" vertex="1" connectable="0">
           <mxGeometry x="11" y="123" width="156.25" height="30" as="geometry" />
