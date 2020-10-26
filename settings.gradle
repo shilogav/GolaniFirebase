@@ -1,2 +1,4 @@
+include ':lib'
+include ':lib'
 include ':app'
-rootProject.name = "My Login Firebase"
+rootProject.name = "GolaniManage"

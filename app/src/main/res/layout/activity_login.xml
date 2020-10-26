@@ -9,7 +9,8 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context=".ui.login.LoginActivity">
+    android:background="@color/Gray"
+    tools:context=".login.LoginActivity">
 
     <EditText
         android:id="@+id/username"
@@ -21,6 +22,7 @@
         android:autofillHints="@string/prompt_email"
         android:gravity="center_horizontal"
         android:hint="@string/prompt_email"
+        android:textColor="@color/White"
         android:inputType="textPersonName"
         android:selectAllOnFocus="true"
         app:layout_constraintEnd_toEndOf="parent"
@@ -40,6 +42,7 @@
         android:imeActionLabel="@string/action_sign_in_short"
         android:imeOptions="actionDone"
         android:inputType="number"
+        android:textColor="@color/White"
         android:selectAllOnFocus="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -47,8 +50,8 @@
 
     <Button
         android:id="@+id/login"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="210dp"
+        android:layout_height="45dp"
         android:layout_gravity="start"
         android:layout_marginStart="48dp"
         android:layout_marginTop="16dp"
@@ -56,6 +59,7 @@
         android:layout_marginBottom="64dp"
         android:enabled="false"
         android:text="@string/action_sign_in"
+        android:textColor="@color/Black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
