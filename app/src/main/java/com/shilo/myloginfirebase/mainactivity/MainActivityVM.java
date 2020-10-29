@@ -16,10 +16,21 @@ import androidx.lifecycle.AndroidViewModel;
 
 public class MainActivityVM extends AndroidViewModel {
     private Repository repository;
+    private TeamLiveData teamLiveData;
+
 
     public MainActivityVM(@NonNull Application application) {
         super(application);
         this.repository = new Repository();
+        this.teamLiveData = null;
+    }
+
+    public void init(){
+        if(teamLiveData != null){
+            return;
+        }
+        //repository = NoteRepository.getInstance();
+        teamLiveData = repository.getTeams();
     }
 
     public LoggedInUser getUser(Activity activity){
@@ -27,7 +38,7 @@ public class MainActivityVM extends AndroidViewModel {
     }
 
     public TeamLiveData getTeamlist(){
-        return repository.getTeams(null);
+        return repository.getTeams();
     }
 
 }

@@ -1,24 +1,31 @@
 package com.shilo.myloginfirebase.mainactivity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.shilo.myloginfirebase.R;
 import com.shilo.myloginfirebase.databinding.ActivityMainV1Binding;
 import com.shilo.myloginfirebase.mainactivity.adapters.RecyclerAdapter;
-import com.shilo.myloginfirebase.mainactivity.data.Repository;
 import com.shilo.myloginfirebase.mainactivity.model.Soldier;
-import com.shilo.myloginfirebase.mainactivity.model.Team;
 import com.shilo.myloginfirebase.model.LoggedInUser;
 
+import java.lang.ref.ReferenceQueue;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity1 extends AppCompatActivity {
     private MainActivityVM viewModel;
@@ -38,9 +45,26 @@ public class MainActivity1 extends AppCompatActivity {
         Toast.makeText(this,"main activity version 1. user is " + user.toString(),Toast.LENGTH_LONG).show();
         Log.i("main activity", "user is " + user.toString());
 
+        //viewModel.init();
+
         //initialize
         initRecyclerView();
+
+
+
+
+        /*viewModel.getTeamlist().observe(this, new Observer<List<Team>>() {
+            @Override
+            public void onChanged(List<Team> teams) {
+                Log.i("main activity", "on changed called");
+                adapter.setSoldiers(teams.get(0).getCrew());
+            }
+        });*/
+
+        //viewModel.getTeamlist().onEvent(null,null);
     }
+
+
 
     /**
      * Recycler view initialize
@@ -74,7 +98,7 @@ public class MainActivity1 extends AppCompatActivity {
         soldiersExample.add(soldier10);
         soldiersExample.add(soldier11);
         soldiersExample.add(soldier12);
-        adapter.setSoldiers(soldiersExample);
+        //TODO:adapter.setSoldiers(soldiersExample);
         adapter.setOnRVClickListener(new RecyclerAdapter.RecyclerViewClickListener() {
             @Override
             public void onclick(Soldier soldier) {
@@ -85,6 +109,5 @@ public class MainActivity1 extends AppCompatActivity {
         mainBinding.recyclerViewSoldiers.setLayoutManager(new LinearLayoutManager(this));
         mainBinding.recyclerViewSoldiers.setHasFixedSize(true);
         mainBinding.recyclerViewSoldiers.setAdapter(adapter);
-
     }
 }

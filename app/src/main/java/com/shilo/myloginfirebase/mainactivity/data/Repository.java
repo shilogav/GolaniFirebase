@@ -24,7 +24,7 @@ public class Repository {
         return Utility.fromSharedPreferences(prefs);
     }
 
-    public TeamLiveData getTeams(DocumentReference reference){
-        return dataSource.getFirestoreTeamLiveData(reference);
+    public TeamLiveData getTeams(){
+        return dataSource.getFirestoreTeamLiveData();
     }
 }

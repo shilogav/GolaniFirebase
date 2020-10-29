@@ -3,8 +3,11 @@ package com.shilo.myloginfirebase.mainactivity.model;
 public class Soldier {
     private String id;
     private String name;
-    private int rate;
+    private int rate;//summery rate
     private String comment;
+
+    public Soldier() {
+    }
 
     public Soldier(String name) {
         this.name = name;

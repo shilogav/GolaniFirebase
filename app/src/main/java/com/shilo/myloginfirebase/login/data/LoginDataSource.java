@@ -27,6 +27,8 @@ import java.util.UUID;
 import androidx.annotation.NonNull;
 
 import static android.content.ContentValues.TAG;
+import static com.shilo.myloginfirebase.model.LoggedInUser.ADMIN;
+import static com.shilo.myloginfirebase.model.LoggedInUser.TEAM_LEADER;
 
 /**
  * Class that handles authentication w/ login credentials and retrieves user information.
@@ -60,7 +62,7 @@ public class LoginDataSource {
         LoggedInUser mUser =
                 new LoggedInUser(
                         userID,
-                        username, username.equals("admin")? Utility.Role.A: Utility.Role.C);
+                        username, username.equals("admin")? ADMIN: TEAM_LEADER);
         ////////////////////////
 
         //firestore

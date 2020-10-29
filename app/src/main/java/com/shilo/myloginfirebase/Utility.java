@@ -7,12 +7,6 @@ import com.shilo.myloginfirebase.model.LoggedInUser;
 
 public class Utility {
 
-    public enum Role {
-        A,
-        B,
-        C
-    }
-
     public static LoggedInUser fromSharedPreferences(SharedPreferences prefs)
     {
         Gson gson = new Gson();

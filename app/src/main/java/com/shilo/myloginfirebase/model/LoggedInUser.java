@@ -6,20 +6,24 @@ import com.shilo.myloginfirebase.Utility;
  * Data class that captures user information for logged in users retrieved from LoginRepository
  */
 
-
 public class LoggedInUser {
+
+    public static final String ADMIN = "A";
+    public static final String COMMAND = "B";
+    public static final String TEAM_LEADER = "C";
+
 
     private String userId;
     private String displayName;
-    private Utility.Role role;
+    private String role;
 
-    public LoggedInUser(String userId, String displayName, Utility.Role role) {
+    public LoggedInUser(String userId, String displayName, String role) {
         this.userId = userId;
         this.displayName = displayName;
         this.role = role;
     }
 
-    public Utility.Role getRole() {
+    public String getRole() {
         return role;
     }
 
