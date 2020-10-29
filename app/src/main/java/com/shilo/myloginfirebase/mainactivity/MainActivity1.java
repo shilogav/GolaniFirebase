@@ -3,6 +3,8 @@ package com.shilo.myloginfirebase.mainactivity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import android.os.Bundle;
@@ -20,16 +22,18 @@ import com.shilo.myloginfirebase.R;
 import com.shilo.myloginfirebase.databinding.ActivityMainV1Binding;
 import com.shilo.myloginfirebase.mainactivity.adapters.RecyclerAdapter;
 import com.shilo.myloginfirebase.mainactivity.model.Soldier;
+import com.shilo.myloginfirebase.mainactivity.model.Team;
 import com.shilo.myloginfirebase.model.LoggedInUser;
 
 import java.lang.ref.ReferenceQueue;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity1 extends AppCompatActivity {
     private MainActivityVM viewModel;
-    private LoggedInUser user;
+    private MutableLiveData<LoggedInUser> userLiveData;
     private RecyclerAdapter adapter;
     private ActivityMainV1Binding mainBinding;
 
@@ -41,9 +45,9 @@ public class MainActivity1 extends AppCompatActivity {
         //view model
         viewModel = new ViewModelProvider(this).get(MainActivityVM.class);
 
-        user = viewModel.getUser(this);
-        Toast.makeText(this,"main activity version 1. user is " + user.toString(),Toast.LENGTH_LONG).show();
-        Log.i("main activity", "user is " + user.toString());
+        userLiveData = viewModel.getUser(this);
+        Toast.makeText(this,"main activity version 1. user is " + userLiveData.getValue().toString(),Toast.LENGTH_LONG).show();
+        Log.i("main activity", "user is " + userLiveData.getValue().toString());
 
         //viewModel.init();
 
@@ -53,13 +57,15 @@ public class MainActivity1 extends AppCompatActivity {
 
 
 
-        /*viewModel.getTeamlist().observe(this, new Observer<List<Team>>() {
+        viewModel.getTeamlist().observe(this, new Observer<List<Team>>() {
             @Override
             public void onChanged(List<Team> teams) {
                 Log.i("main activity", "on changed called");
                 adapter.setSoldiers(teams.get(0).getCrew());
             }
-        });*/
+        });
+
+        viewModel.getCloud();
 
         //viewModel.getTeamlist().onEvent(null,null);
     }

@@ -13,6 +13,8 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 public class MainActivityVM extends AndroidViewModel {
     private Repository repository;
@@ -33,12 +35,16 @@ public class MainActivityVM extends AndroidViewModel {
         teamLiveData = repository.getTeams();
     }
 
-    public LoggedInUser getUser(Activity activity){
+    public MutableLiveData<LoggedInUser> getUser(Activity activity){
         return repository.getUser(activity);
     }
 
     public TeamLiveData getTeamlist(){
         return repository.getTeams();
+    }
+
+    public void getCloud() {
+        repository.getCloud();
     }
 
 }

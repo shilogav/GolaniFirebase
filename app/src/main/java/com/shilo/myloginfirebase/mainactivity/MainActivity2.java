@@ -14,6 +14,7 @@ import com.shilo.myloginfirebase.login.data.LoginDataSource;
 import com.shilo.myloginfirebase.model.LoggedInUser;
 
 import androidx.appcompat.app.ActionBar;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
@@ -30,7 +31,7 @@ public class MainActivity2 extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private MainActivityVM viewModel;
-    private LoggedInUser user;
+    private MutableLiveData<LoggedInUser> user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

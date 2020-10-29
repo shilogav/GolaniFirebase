@@ -13,9 +13,12 @@ public class LoggedInUser {
     public static final String TEAM_LEADER = "C";
 
 
+
+
     private String userId;
     private String displayName;
     private String role;
+    private String leaderOfTeam;
 
     public LoggedInUser(String userId, String displayName, String role) {
         this.userId = userId;

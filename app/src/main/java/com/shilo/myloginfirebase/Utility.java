@@ -5,7 +5,11 @@ import android.content.SharedPreferences;
 import com.google.gson.Gson;
 import com.shilo.myloginfirebase.model.LoggedInUser;
 
+import java.util.ArrayList;
+
 public class Utility {
+
+    public ArrayList<String> teamsListName;
 
     public static LoggedInUser fromSharedPreferences(SharedPreferences prefs)
     {
