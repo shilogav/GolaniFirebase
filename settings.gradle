@@ -1,4 +1,3 @@
-include ':lib'
-include ':lib'
+include ':lib_admin_sdk'
 include ':app'
 rootProject.name = "GolaniManage"

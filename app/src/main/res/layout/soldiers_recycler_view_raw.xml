@@ -6,7 +6,7 @@
     <data>
         <variable
             name="soldier"
-            type="com.shilo.myloginfirebase.mainactivity.model.Soldier" />
+            type="com.shilo.golanimanage.mainactivity.model.Soldier" />
         
     </data>
 

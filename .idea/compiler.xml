@@ -2,7 +2,9 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
-      <module name="lib" target="1.7" />
+      <module name="lib_admin_sdk" target="1.7" />
+      <module name="lib_cloud" target="1.7" />
+      <module name="lib_to_cloud" target="1.7" />
     </bytecodeTargetLevel>
   </component>
 </project>

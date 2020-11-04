@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.shilo.myloginfirebase">
+    package="com.shilo.golanimanage">
 
     <application
         android:icon="@mipmap/ic_launcher_firebase"
@@ -8,9 +8,9 @@
         android:roundIcon="@mipmap/ic_launcher_firebase_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".mainactivity.MainActivity1"></activity>
+        <activity android:name="com.shilo.golanimanage.mainactivity.MainActivity1"></activity>
         <activity
-            android:name=".login.LoginActivity"
+            android:name="com.shilo.golanimanage.login.LoginActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,7 +19,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".mainactivity.MainActivity2"
+            android:name="com.shilo.golanimanage.mainactivity.MainActivity2"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar" />
     </application>

@@ -8,17 +8,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:815015468485:android:d3b04bc77df1794374ffac",
+        "mobilesdk_app_id": "1:815015468485:android:18a4a989612bd7a574ffac",
         "android_client_info": {
-          "package_name": "com.shilo.myloginfirebase"
+          "package_name": "com.shilo.golanimanage"
         }
       },
       "oauth_client": [
         {
-          "client_id": "815015468485-ctt3srv8qe2bardedr7omf6h4e0vcf6c.apps.googleusercontent.com",
+          "client_id": "815015468485-7eemqam7mvdkimrnnoehmarctthflkn0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.shilo.myloginfirebase",
+            "package_name": "com.shilo.golanimanage",
             "certificate_hash": "6493db955fb68a1b49a538cccb339935ef79bc20"
           }
         },
