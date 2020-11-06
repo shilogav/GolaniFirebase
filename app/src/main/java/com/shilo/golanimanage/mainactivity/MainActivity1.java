@@ -3,6 +3,7 @@ package com.shilo.golanimanage.mainactivity;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import com.shilo.golanimanage.mainactivity.model.Soldier;
 import com.shilo.golanimanage.model.LoggedInUser;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity1 extends AppCompatActivity {
     private MainActivityVM viewModel;
@@ -49,7 +51,22 @@ public class MainActivity1 extends AppCompatActivity {
             }
         });*/
 
+        /**
+         * general fetch method. to be deleted
+         */
         viewModel.getCloud();
+
+        /**
+         * observer for soldiers
+         */
+        viewModel.getSoldiersLiveData().observe(this, new Observer<List<Soldier>>() {
+            @Override
+            public void onChanged(List<Soldier> soldiers) {
+                adapter.setSoldiers(soldiers);
+            }
+        });
+
+
 
         //viewModel.getTeamlist().onEvent(null,null);
     }

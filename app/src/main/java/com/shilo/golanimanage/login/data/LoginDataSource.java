@@ -14,6 +14,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.shilo.golanimanage.model.LoggedInUser;
 
 import java.io.IOException;
@@ -33,6 +35,10 @@ public class LoginDataSource {
     private String userID;
     private FirebaseUser currentUser;
     private String mCustomToken;
+    public static final String LOG = "LoginDataSource";
+
+    //firestore
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public static final String Token = "eyJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJodHRwczovL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbS9nb29nbGUuaWRlbnRpdHkuaWRlbnRpdHl0b29sa2l0LnYxLklkZW50aXR5VG9vbGtpdCIsImNsYWltcyI6eyJwcmVtaXVtQWNjb3VudCI6dHJ1ZX0sImV4cCI6MTYwMzI4MzMwMCwiaWF0IjoxNjAzMjc5NzAwLCJpc3MiOiJmaXJlYmFzZS1hZG1pbnNkay00ZTBmekBmaXItdXNlcnMtZDk2ODUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay00ZTBmekBmaXItdXNlcnMtZDk2ODUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJ1aWQiOiJhZWFmMDQ3Zi1kYTJlLTQwMGYtYWNiMS04ZDdmODg3Mzc3ZDMifQ.RM8Bg4ZPXjdw7j_yiN-fs4-HYGohJ8n1lKTROsusolW4h_3D0ZtDn6AP-YpBKjX-1_Bv2tclaEdprT3ZiRRqkqPOZW1PlnFhwV2LL5O2szlz9kneEqpN9knPLWl44KfaNlu1CBENjHeNbPhEuRdWMd4fIm0GSJEwq60wbHP4Pnb-z8sfAinwzIKg2KLTefH_l8COY9PuK4xSV_O03T8qmw4nGr5_yWGourzPRhJgmbJqbhbogFHqnWS1SGdnZw2VWEnH7T3woGA9iMtT6qmlPWfu5Mp3JRr6Xl2rnj36sF4_4Fzka9GmvjYB6u-z9I27kicZ_awT-EFdM9nziMTHlA";
     public static LoginDataSource getInstance(){
@@ -53,20 +59,23 @@ public class LoginDataSource {
         //firebaseAuthCustom();
         userID = UUID.randomUUID().toString();
         ////////////////////////
-        LoggedInUser mUser =
-                new LoggedInUser(
+        LoggedInUser mUser = new LoggedInUser(username);
+                /*new LoggedInUser(
                         userID,
-                        username, username.equals("admin")? ADMIN: TEAM_LEADER);
+                        username, username.equals("admin")? ADMIN: TEAM_LEADER);*/
         ////////////////////////
 
-        //firestore
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
         /*Map<String, Object> user = new HashMap<>();
         user.put("userId", java.util.UUID.randomUUID().toString());
         user.put("displayName", username);
         user.put("role", username.equals("admin")?Utility.Role.A: Utility.Role.C);*/
         //if (currentUser != null) {
             //Log.i("Firebase Firestore", "mAuth.getUid() is " + mAuth.getUid());
+
+
+
+
             // Add a new document with a generated ID
             db.collection("users")
                     .add(mUser)

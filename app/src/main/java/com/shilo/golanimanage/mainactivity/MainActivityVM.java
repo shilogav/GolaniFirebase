@@ -5,7 +5,11 @@ import android.app.Application;
 
 import com.shilo.golanimanage.mainactivity.data.Repository;
 import com.shilo.golanimanage.mainactivity.livedata.TeamLiveData;
+import com.shilo.golanimanage.mainactivity.model.Soldier;
+import com.shilo.golanimanage.mainactivity.model.Team;
 import com.shilo.golanimanage.model.LoggedInUser;
+
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -40,12 +44,25 @@ public class MainActivityVM extends AndroidViewModel {
         repository.toCloud();
     }
 
+    /**
+     * deprecated method
+     * @return
+     */
     public TeamLiveData getTeamlist(){
         return repository.getTeams();
     }
 
     public void getCloud() {
         repository.getCloud();
+    }
+
+    public MutableLiveData<Team> getTeamLiveData() {
+        return repository.getTeamLiveData();
+    }
+
+    public MutableLiveData<List<Soldier>> getSoldiersLiveData() {
+        return repository.getSoldiersLiveData();
+
     }
 
 }

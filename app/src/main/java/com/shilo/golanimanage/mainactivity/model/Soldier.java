@@ -3,10 +3,17 @@ package com.shilo.golanimanage.mainactivity.model;
 public class Soldier {
     private String id;
     private String name;
-    private int rate;//summery rate
+    private long rate;//summery rate
     private String comment;
 
     public Soldier() {
+    }
+
+    public Soldier(String id, String name, long rate, String comment) {
+        this.id = id;
+        this.name = name;
+        this.rate = rate;
+        this.comment = comment;
     }
 
     public Soldier(String name) {
@@ -21,7 +28,7 @@ public class Soldier {
         this.name = name;
     }
 
-    public int getRate() {
+    public long getRate() {
         return rate;
     }
 

@@ -50,6 +50,7 @@ public class LoginRepository {
 
         SharedPreferences prefs = context.getSharedPreferences("UserData", MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("name", user.getName());
         toSharedPreferences(editor,user);
     }
 
