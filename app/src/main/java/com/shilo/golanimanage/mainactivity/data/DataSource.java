@@ -35,7 +35,6 @@ import java.util.concurrent.Future;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 public class DataSource {
@@ -355,7 +354,7 @@ public class DataSource {
         }
 
         for (DocumentReference reference: referenceList) {
-            Log.d(LOG_NAME, "ReferenceToSoldierList: Current data: " + reference);
+            //Log.d(LOG_NAME, "ReferenceToSoldierList: Current data: " + reference);
             firebaseFirestore.document(reference.getPath())
                     .addSnapshotListener(new EventListener<DocumentSnapshot>() {
                         @Override
@@ -372,8 +371,7 @@ public class DataSource {
                                 Soldier soldier = new Soldier
                                         ((String) soldierMap.get("id"), (String) soldierMap.get("name")
                                                 , (long) soldierMap.get("rate"), (String) soldierMap.get("comment"));
-                                soldierList.add(soldier);
-
+                                    soldierList.add(soldier);
                             } else  {
                                 Log.w(LOG_NAME, "ReferenceToSoldierList: Current data: null");
                             }

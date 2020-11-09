@@ -1,6 +1,8 @@
 package com.shilo.golanimanage.mainactivity.model;
 
-public class Soldier {
+import java.io.Serializable;
+
+public class Soldier implements Serializable {
     private String id;
     private String name;
     private long rate;//summery rate
@@ -18,6 +20,14 @@ public class Soldier {
 
     public Soldier(String name) {
         this.name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {

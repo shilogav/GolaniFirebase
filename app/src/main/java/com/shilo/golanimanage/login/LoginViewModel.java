@@ -114,7 +114,7 @@ public class LoginViewModel extends ViewModel {
         return new HashMap<String, Integer>() {
             {
                 put("ch",5);
-                put("Admin",564215);
+                put("Admin",555555);
                 put("Shalom",801553);
                 put("Shaul", 6584818);
                 put("Ron", 5465844);

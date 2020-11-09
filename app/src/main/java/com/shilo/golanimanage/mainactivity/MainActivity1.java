@@ -2,19 +2,23 @@ package com.shilo.golanimanage.mainactivity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.shilo.golanimanage.R;
 import com.shilo.golanimanage.databinding.ActivityMainV1Binding;
 import com.shilo.golanimanage.mainactivity.adapters.RecyclerAdapter;
 import com.shilo.golanimanage.mainactivity.model.Soldier;
+import com.shilo.golanimanage.mainactivity.fragments.SoldierDetailsFragment;
 import com.shilo.golanimanage.model.LoggedInUser;
 
 import java.util.ArrayList;
@@ -110,11 +114,26 @@ public class MainActivity1 extends AppCompatActivity {
             @Override
             public void onclick(Soldier soldier) {
                 Toast.makeText(getApplicationContext(),"typed soldier: " + soldier.getName(), Toast.LENGTH_LONG).show();
+
+                Log.i("main activity", "onclick()");
+                loadFragment(new SoldierDetailsFragment());
+
             }
         });
 
         mainBinding.recyclerViewSoldiers.setLayoutManager(new LinearLayoutManager(this));
         mainBinding.recyclerViewSoldiers.setHasFixedSize(true);
         mainBinding.recyclerViewSoldiers.setAdapter(adapter);
+    }
+
+    private void loadFragment(Fragment fragment) {
+// create a FragmentManager
+        FragmentManager fm = getSupportFragmentManager();
+// create a FragmentTransaction to begin the transaction and replace the Fragment
+        FragmentTransaction fragmentTransaction = fm.beginTransaction();
+// replace the FrameLayout with new Fragment
+        fragmentTransaction.add(R.id.content_frame,fragment);
+        fragmentTransaction.commit(); // save the changes
+        Log.i("main activity", "fragmentTransaction.commit()");
     }
 }

@@ -62,7 +62,6 @@ public class MainActivityVM extends AndroidViewModel {
 
     public MutableLiveData<List<Soldier>> getSoldiersLiveData() {
         return repository.getSoldiersLiveData();
-
     }
 
 }

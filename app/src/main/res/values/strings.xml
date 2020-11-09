@@ -16,8 +16,18 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
+    <string name="soldier_id">תעודת זהות</string>
+    <string name="soldier_name">שם החייל</string>
+    <string name="soldier_rate">ציון</string>
+    <string name="soldier_comment">הערות</string>
+    <string name="report_area">דו"ח שטח</string>
+    <string name="report_interview">דו"ח ראיון</string>
+    <string name="report_retirement">פרישה</string>
+
 
     <string name="menu_home">רשימת חיילים</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

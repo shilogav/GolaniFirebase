@@ -8,6 +8,7 @@ import com.shilo.golanimanage.R;
 import com.shilo.golanimanage.databinding.SoldiersRecyclerViewRawBinding;
 import com.shilo.golanimanage.mainactivity.model.Soldier;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
+public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> implements Serializable {
     private List<Soldier> soliders = new ArrayList<>();
     private RecyclerViewClickListener listener;
 
@@ -43,6 +44,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public void setSoldiers(List<Soldier> soliders) {
         this.soliders = soliders;
         notifyDataSetChanged();
+    }
+
+    public List<Soldier> getSoliders() {
+        return soliders;
     }
 
     public Soldier getSoldierAt(int position) {

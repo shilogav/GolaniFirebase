@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.shilo.golanimanage.R;
 import com.shilo.golanimanage.mainactivity.MainActivity1;
+import com.shilo.golanimanage.mainactivity.MainActivityV3;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -184,14 +185,14 @@ public class LoginActivity extends AppCompatActivity {
 
     private void checkLogin(){
         if (loginViewModel.isLoggedIn(this)){
-            Intent intent = new Intent(this, MainActivity1.class);
+            Intent intent = new Intent(this, MainActivityV3.class);
             startActivity(intent);
             finish();
         }
     }
 
     private void updateUiWithUser(LoggedInUserView model) {
-        Intent intent = new Intent(this, MainActivity1.class);
+        Intent intent = new Intent(this, MainActivityV3.class);
         startActivity(intent);
         finish();
     }
