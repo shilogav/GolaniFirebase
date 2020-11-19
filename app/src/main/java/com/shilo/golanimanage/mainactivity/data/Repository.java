@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.shilo.golanimanage.Utility;
 import com.shilo.golanimanage.mainactivity.livedata.TeamLiveData;
+import com.shilo.golanimanage.mainactivity.model.Report;
 import com.shilo.golanimanage.mainactivity.model.Soldier;
 import com.shilo.golanimanage.mainactivity.model.Team;
 import com.shilo.golanimanage.model.LoggedInUser;
@@ -21,9 +22,19 @@ import static android.content.Context.MODE_PRIVATE;
  */
 public class Repository {
     DataSource dataSource;
+    static Repository instance;
     private MutableLiveData<LoggedInUser> userLiveData;
+    Report report;
 
-    public Repository() {
+
+    public static Repository getInstance(){
+        if (instance == null){
+            instance = new Repository();
+        }
+        return instance;
+    }
+
+    private Repository() {
         dataSource = DataSource.getInstance();
     }
 
@@ -37,8 +48,8 @@ public class Repository {
     public MutableLiveData<LoggedInUser> getUser(Activity activity){
         SharedPreferences prefs =activity.getSharedPreferences("UserData", MODE_PRIVATE);
 
-        getUserLiveData().setValue(Utility.fromSharedPreferences(prefs));
-        getUserLiveData().setValue(new LoggedInUser("user1"));
+        getUserLiveData().setValue((LoggedInUser) Utility.fromSharedPreferences(prefs, "user"));
+        //getUserLiveData().setValue(new LoggedInUser("user1"));
         dataSource.setUserLiveData(getUserLiveData());
         return getUserLiveData();
     }
@@ -51,9 +62,9 @@ public class Repository {
      * deprecated method
      * @return
      */
-    public TeamLiveData getTeams(){
+    /*public TeamLiveData getTeams(){
         return dataSource.getFirestoreTeamLiveData();
-    }
+    }*/
 
     public void getCloud(){
         dataSource.getFromCloud();
@@ -65,6 +76,14 @@ public class Repository {
 
     public MutableLiveData<List<Soldier>> getSoldiersLiveData() {
         return dataSource.getSoldiersLiveData();
+    }
 
+    public MutableLiveData<Report> getReport(Soldier soldier, String reportType) {
+        return dataSource.getReportLiveData(soldier, reportType);
+    }
+
+    public void setReport(Report report, Soldier soldier) {
+        this.report = report;
+        dataSource.setReport(report, soldier, userLiveData.getValue());
     }
 }

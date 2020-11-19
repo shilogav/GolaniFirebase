@@ -11,6 +11,11 @@
         android:id="@+id/fragment_container"
         android:background="@color/Black">
 
+        <include
+            android:id="@+id/layoutProgressBar"
+            android:visibility="gone"
+            layout="@layout/progress_bar_layout" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"

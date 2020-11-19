@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -17,7 +18,7 @@ import android.widget.Toast;
 
 import com.shilo.golanimanage.R;
 import com.shilo.golanimanage.databinding.FragmentSoldierDetailsBinding;
-import com.shilo.golanimanage.databinding.FragmentSoldierListBinding;
+import com.shilo.golanimanage.mainactivity.dialog.RetirementDialog;
 import com.shilo.golanimanage.mainactivity.model.Soldier;
 
 /**
@@ -25,9 +26,13 @@ import com.shilo.golanimanage.mainactivity.model.Soldier;
  * Use the {@link SoldierDetailsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SoldierDetailsFragment extends Fragment {
-    private SoldierListViewModel viewModel;
+public class SoldierDetailsFragment extends Fragment implements RetirementDialog.DialogListener {
+
+    private SoldierListViewModel viewModel;//also using SoldierListViewModel
     private FragmentSoldierDetailsBinding binding;
+    public static final String PLAIN = "plain";
+    public static final String INTERVIEW = "interview";
+    public static final String REPORT_TYPE = "reportType";
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -74,7 +79,7 @@ public class SoldierDetailsFragment extends Fragment {
                              Bundle savedInstanceState) {
         //data binding
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_soldier_details, container, false);
-        View view = binding.getRoot();
+        final View view = binding.getRoot();
 
         //view model
         viewModel = new ViewModelProvider(this).get(SoldierListViewModel.class);
@@ -89,7 +94,12 @@ public class SoldierDetailsFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                loadFragment(new PlainReportFragment());
+                ReportFragment fragment = new ReportFragment();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("soldier",(Soldier) getArguments().getSerializable("soldier"));
+                bundle.putString(REPORT_TYPE, PLAIN);
+                fragment.setArguments(bundle);
+                loadFragment(fragment);
 
             }
         });
@@ -97,7 +107,12 @@ public class SoldierDetailsFragment extends Fragment {
         binding.buttonInterview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadFragment(new PlainReportFragment());
+                ReportFragment fragment = new ReportFragment();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("soldier",(Soldier) getArguments().getSerializable("soldier"));
+                bundle.putString(REPORT_TYPE, INTERVIEW);
+                fragment.setArguments(bundle);
+                loadFragment(fragment);
             }
         });
 
@@ -106,6 +121,10 @@ public class SoldierDetailsFragment extends Fragment {
             public void onClick(View v) {
 
                 Toast.makeText(getContext(), "should open dialog manager", Toast.LENGTH_SHORT).show();
+                RetirementDialog dialog = new RetirementDialog();
+                dialog.show(getChildFragmentManager(), null);
+
+
             }
         });
 
@@ -126,5 +145,20 @@ public class SoldierDetailsFragment extends Fragment {
         fragmentTransaction.add(R.id.content_frame,fragment);
         fragmentTransaction.commit(); // save the changes
         Log.i("MainActivityV3", "fragmentTransaction.commit()");
+    }
+
+    @Override
+    public void onDialogIndependentRetirement(DialogFragment dialog) {
+        Toast.makeText(getContext(), "independent",Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDialogMedicalRetirement(DialogFragment dialog) {
+        Toast.makeText(getContext(), "medical",Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDialogInitiatedRetirement(DialogFragment dizlog) {
+        Toast.makeText(getContext(), "initiated",Toast.LENGTH_SHORT).show();
     }
 }

@@ -28,6 +28,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="800dp"
+                android:id="@+id/contentFragmentDetails"
                 android:layout_gravity="">
 
                 <TextView
@@ -128,7 +129,7 @@
                     android:layout_height="45dp"
                     android:background="#a0522d"
                     android:layout_marginVertical="100dp"
-                    android:text="@string/report_area"
+                    android:text="@string/report_plain"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.497"
                     app:layout_constraintStart_toStartOf="parent"

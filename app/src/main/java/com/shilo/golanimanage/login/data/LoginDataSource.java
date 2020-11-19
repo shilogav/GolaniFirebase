@@ -1,6 +1,7 @@
 package com.shilo.golanimanage.login.data;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -13,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -23,6 +25,8 @@ import java.util.UUID;
 
 import androidx.annotation.NonNull;
 
+import static android.content.Context.MODE_PRIVATE;
+import static com.shilo.golanimanage.Utility.toSharedPreferences;
 import static com.shilo.golanimanage.model.LoggedInUser.ADMIN;
 import static com.shilo.golanimanage.model.LoggedInUser.TEAM_LEADER;
 
@@ -36,6 +40,9 @@ public class LoginDataSource {
     private FirebaseUser currentUser;
     private String mCustomToken;
     public static final String LOG = "LoginDataSource";
+    LoggedInUser mUser;
+    Activity activity;
+
 
     //firestore
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -50,16 +57,19 @@ public class LoginDataSource {
 
     /**
      * check authentication of user on database
+     * The users won't create now. these are already exist
+     * so, just fetch the whole user data
      * @param username
      * @return
      */
-    public Result<LoggedInUser> login(Activity activity, String username, String password) {
+    public Result<LoggedInUser> login(final Activity activity, String username, String password) {
+        this.activity = activity;
         //TODO: finish the authentication
         //firebaseAuth(activity,password);
         //firebaseAuthCustom();
-        userID = UUID.randomUUID().toString();
+        //userID = UUID.randomUUID().toString();
         ////////////////////////
-        LoggedInUser mUser = new LoggedInUser(username);
+        mUser = new LoggedInUser(username);
                 /*new LoggedInUser(
                         userID,
                         username, username.equals("admin")? ADMIN: TEAM_LEADER);*/
@@ -74,8 +84,22 @@ public class LoginDataSource {
             //Log.i("Firebase Firestore", "mAuth.getUid() is " + mAuth.getUid());
 
 
+        /*db.collection("users")
+                .document(mUser.getName())
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        mUser.setUserId(documentSnapshot.getString("id"));
+                        mUser.setRole(documentSnapshot.getString("role"));
+                        mUser.setLeaderOfTeam(documentSnapshot.get("leaderOfTeam"));
+                        saveUserForSharedPref(mUser);
+                        Log.i("LoginDataSource -> fetched user: ", mUser.toString());
+                    }
+                });*/
 
 
+        /*
             // Add a new document with a generated ID
             db.collection("users")
                     .add(mUser)
@@ -91,7 +115,7 @@ public class LoginDataSource {
                             Log.i("Firebase Firestore", "Error adding document", e);
                         }
                     });
-
+*/
         //}
 
         try {
@@ -101,6 +125,8 @@ public class LoginDataSource {
         }
 
     }
+
+
 
     private void firebaseAuthEmail(Activity activity, String password){
         mAuth = FirebaseAuth.getInstance();

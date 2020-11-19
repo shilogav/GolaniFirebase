@@ -113,7 +113,7 @@ public class LoginViewModel extends ViewModel {
     private HashMap <String,Integer> setUserAndPasswordMap() {
         return new HashMap<String, Integer>() {
             {
-                put("ch",5);
+                put("user1",5);
                 put("Admin",555555);
                 put("Shalom",801553);
                 put("Shaul", 6584818);

@@ -2,6 +2,7 @@ package com.shilo.golanimanage.mainactivity;
 
 import android.app.Activity;
 import android.app.Application;
+import android.util.Log;
 
 import com.shilo.golanimanage.mainactivity.data.Repository;
 import com.shilo.golanimanage.mainactivity.livedata.TeamLiveData;
@@ -22,7 +23,7 @@ public class MainActivityVM extends AndroidViewModel {
 
     public MainActivityVM(@NonNull Application application) {
         super(application);
-        this.repository = new Repository();
+        this.repository = Repository.getInstance();
         this.teamLiveData = null;
         toCloud();
     }
@@ -41,6 +42,7 @@ public class MainActivityVM extends AndroidViewModel {
     }
 
     private void toCloud(){
+        Log.i("MainActivityVM -> toCloud", "executed");
         repository.toCloud();
     }
 
@@ -48,9 +50,9 @@ public class MainActivityVM extends AndroidViewModel {
      * deprecated method
      * @return
      */
-    public TeamLiveData getTeamlist(){
+    /*public TeamLiveData getTeamlist(){
         return repository.getTeams();
-    }
+    }*/
 
     public void getCloud() {
         repository.getCloud();

@@ -21,12 +21,36 @@
     <string name="soldier_name">שם החייל</string>
     <string name="soldier_rate">ציון</string>
     <string name="soldier_comment">הערות</string>
-    <string name="report_area">דו"ח שטח</string>
+    <string name="report_plain">דו"ח שטח</string>
     <string name="report_interview">דו"ח ראיון</string>
     <string name="report_retirement">פרישה</string>
     <string name="retirement_independent">פרישה עצמית</string>
-    <string name="retirement_medical">פרישה עצמית</string>
+    <string name="retirement_medical">פרישה רפואית</string>
     <string name="retirement_initiated">פרישה יזומה</string>
+    <string name="report_save_title">שמירה ונעילת הדו"ח</string>
+    <string name="report_save_message">בטוח שאתה רוצה לשמור?\n הדו"ח יהיה נעול לעריכה</string>
+    <string name="report_save_positive">כן</string>
+    <string name="report_save_negative">לא</string>
+    
+
+    <string name="plain_second">עבודה בתנאי לחץ</string>
+    <string name="plain_third">השקעה והתמדה</string>
+    <string name="plain_fourth">מנהיגות</string>
+    <string name="plain_fifth">עבודת צוות</string>
+    <string name="plain_sixth">כושר פיזי</string>
+    <string name="plain_seventh">תכנון ותושייה</string>
+    <string name="plain_eighth">אמינות</string>
+    <string name="plain_ninth">עד כמה מתאים החייל לשרת ביחידה</string>
+    <string name="plain_tenth">ציון סופי</string>
+
+
+    <string name="interview_second">מוטיבציה עניינית לשרת בסיירת גולני/אגוז</string>
+    <string name="interview_third">מנהיגות</string>
+    <string name="interview_fourth">יכולת השתלבות בצוות</string>
+    <string name="interview_fifth">הסתגלות למסגרת צבאית</string>
+    <string name="interview_sixth">רמה אישית</string>
+    <string name="interview_seventh">עד כמה מתאים החייל לשרת ביחידה</string>
+
 
     <string name="menu_home">רשימת חיילים</string>
     <string name="menu_gallery">Gallery</string>

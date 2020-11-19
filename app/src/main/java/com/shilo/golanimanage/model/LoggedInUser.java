@@ -1,6 +1,9 @@
 package com.shilo.golanimanage.model;
 
+import com.shilo.golanimanage.mainactivity.model.Report;
 import com.shilo.golanimanage.mainactivity.model.Team;
+
+import java.util.ArrayList;
 
 /**
  * Data class that captures user information for logged in users retrieved from LoginRepository
@@ -19,18 +22,31 @@ public class LoggedInUser {
     private String name;
     private String role;
     private Team leaderOfTeam;
+    private ArrayList<Report> reports;
 
     public LoggedInUser(String userId, String displayName, String role) {
+        new LoggedInUser();
         this.userId = userId;
         this.name = displayName;
         this.role = role;
     }
 
     public LoggedInUser(String displayName) {
+        new LoggedInUser();
         this.name = displayName;
     }
 
-    public LoggedInUser() { }
+    public LoggedInUser() {
+        reports = new ArrayList<>();
+    }
+
+    public ArrayList<Report> getReports() {
+        return reports;
+    }
+
+    public void setReports(ArrayList<Report> reports) {
+        this.reports = reports;
+    }
 
     public void setUserId(String userId) {
         this.userId = userId;

@@ -1,26 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingTop="50sp"
-    android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/question"
-        android:layout_width="wrap_content"
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="question"
+            type="com.shilo.golanimanage.mainactivity.model.Question" />
+    </data>
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:hint="question"
-        android:textSize="20sp"
-        android:textAlignment="center" />
-    <RatingBar
+        android:paddingTop="50sp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/question"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:hint="@{question.title}"
+            android:textSize="20sp"
+            android:textAlignment="center" />
+        <RatingBar
             android:id="@+id/ratingBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15sp"
             android:layout_gravity="center"
             android:numStars="10"
+            android:rating="@{question.rate}"
             android:isIndicator="false"
             style="@style/Widget.AppCompat.RatingBar.Small"
             />
-</LinearLayout>
+    </LinearLayout>
+</layout>

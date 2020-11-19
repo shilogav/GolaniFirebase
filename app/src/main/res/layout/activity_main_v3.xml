@@ -8,6 +8,7 @@
         android:layout_height="match_parent"
         android:background="@color/DarkGray"
         android:id="@+id/content_frame">
+
     </FrameLayout>
 
 </layout>

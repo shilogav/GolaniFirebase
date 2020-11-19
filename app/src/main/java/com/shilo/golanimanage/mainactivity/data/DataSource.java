@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -14,15 +15,19 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.shilo.golanimanage.mainactivity.livedata.TeamLiveData;
+import com.shilo.golanimanage.mainactivity.model.Question;
+import com.shilo.golanimanage.mainactivity.model.Report;
 import com.shilo.golanimanage.mainactivity.model.Soldier;
 import com.shilo.golanimanage.mainactivity.model.Team;
 import com.shilo.golanimanage.model.LoggedInUser;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,14 +45,22 @@ import androidx.lifecycle.MutableLiveData;
 public class DataSource {
     private static DataSource instance;
     public static final String LOG_NAME = "dataSource";
+    public static final String REPORTS_COLLECTION = "reports";
+    public static final String USERS_COLLECTION = "users";
+    public static final String SOLDIERS_COLLECTION = "soldiers";
+    public static final String TEAMS_COLLECTION = "teams";
     public static FirebaseFirestore firebaseFirestore;
     private MutableLiveData<Team> teamLiveData;
     private MutableLiveData<LoggedInUser> userLiveData;
     private MutableLiveData<List<Soldier>> soldiersLiveData;
+    private MutableLiveData<Report> reportLiveData;
     private final DocumentReference[] referencesTemp = new DocumentReference[1];
     private final List<DocumentReference> crewReferenceList = new ArrayList<>();
     private List<Soldier> soldierList = new ArrayList<>();
-    Context context;
+    private List<DocumentReference> reportsReferences = new ArrayList<>();
+    private ArrayList<Report> reports = new ArrayList<>();
+
+
     //final List<DocumentReference> soldiersListReferences = new ArrayList<>();
 
     public static DataSource getInstance(){
@@ -57,10 +70,11 @@ public class DataSource {
         return instance;
     }
 
-    DataSource(){
+    private DataSource(){
         firebaseFirestore = FirebaseFirestore.getInstance();
         teamLiveData = new MutableLiveData<>();
         soldiersLiveData = new MutableLiveData<>();
+        reportLiveData = new MutableLiveData<>();
         //userLiveData = new MutableLiveData<>();
     }
 
@@ -88,6 +102,162 @@ public class DataSource {
         return teamLiveData;
     }
 
+    public MutableLiveData<Report> getReportLiveData(Soldier soldier, String reportType) {
+        getReportFromCloud(soldier, reportType);
+        return reportLiveData;
+    }
+
+    /**
+     * create report to reports collection and call methods to update user and soldier data
+     * @param report
+     */
+    public void setReport(final Report report, final Soldier soldier, final LoggedInUser user) {
+        firebaseFirestore.collection(REPORTS_COLLECTION)
+                .document(report.getId())
+                .set(report)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(LOG_NAME, "setReport -> report successfully written!");
+                        addReportToSoldier(report.getId(), soldier);
+                        addReportToUser(report.getId(), user);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        try {
+                            throw e;
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+    }
+
+    private void addReportToSoldier(String reportId, Soldier soldier) {
+        DocumentReference documentReference = firebaseFirestore.collection(REPORTS_COLLECTION).document(reportId);
+        firebaseFirestore.collection(SOLDIERS_COLLECTION).document(soldier.getName())
+                .update("reports", FieldValue.arrayUnion(documentReference))
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(LOG_NAME, "addReportToSoldier -> report successfully added to soldier!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        try {
+                            throw e;
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+    }
+
+    private void addReportToUser(String reportId, LoggedInUser user) {
+        DocumentReference documentReference = firebaseFirestore.collection(REPORTS_COLLECTION).document(reportId);
+        firebaseFirestore.collection(USERS_COLLECTION).document(user.getName())
+                .update("reports", FieldValue.arrayUnion(documentReference))
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(LOG_NAME, "addReportToUser -> report successfully added to user!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        try {
+                            throw e;
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+    }
+
+    /**
+     * get report from cloud
+     * @param soldier
+     */
+    public void getReportFromCloud(final Soldier soldier, final String reportType) {
+        firebaseFirestore.collection(SOLDIERS_COLLECTION)
+                .whereEqualTo("id", soldier.getId())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.i(LOG_NAME + " -> getReportFromCloud: ", document.getId() + " => " + document.getData());
+                                reportsReferences = (ArrayList<DocumentReference>)document.get("reports");
+                                getReportsByReference(reportsReferences, soldier, reportType);
+                            }
+                        } else {
+                            task.getException();
+                        }
+                    }
+                });
+    }
+    /**
+     * fetch reports
+     * @param reportsReferences
+     */
+    private void getReportsByReference(final List<DocumentReference> reportsReferences, final Soldier soldier, final String reportType) {
+        if (reportsReferences == null) {
+            return;
+        }
+        reportLiveData.setValue(null);//important. delete report if there is from last fetch
+        Log.i(LOG_NAME, "getReportsByReference -> reportLiveData value become null");
+        for (DocumentReference reference : reportsReferences) {
+            firebaseFirestore.document(reference.getPath())
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    Log.d(LOG_NAME, "getReportsByReference -> DocumentSnapshot data: " + document.getData());
+                                    Map<String, Object> reportTemp = document.getData();
+                                    List<Question> questions = convertHashMapToQuestion((List<HashMap>) reportTemp.get("questionList"));
+                                    if (reportTemp.get("idSoldier").equals(soldier.getId())
+                                            && reportTemp.get("idLeader").equals(userLiveData.getValue().getUserId())
+                                     && reportTemp.get("description").equals(reportType)) {
+                                        Report report = new Report((String) reportTemp.get("description")
+                                                ,(String) reportTemp.get("id"),questions
+                                                ,(String) reportTemp.get("idLeader"),(String) reportTemp.get("idSoldier"));
+                                        reportLiveData.setValue(report);
+                                        Log.i(LOG_NAME, "getReportsByReference -> reportLiveData set");
+                                    } else {
+                                        Log.i(LOG_NAME, "getReportsByReference -> No report for that team leader/user and soldier");
+                                    }
+                                } else {
+                                    Log.i(LOG_NAME, "getReportsByReference -> No such document");
+                                }
+                            } else {
+                                Log.d(LOG_NAME, "getReportsByReference -> get failed with ", task.getException());
+                            }
+                        }
+                    });
+
+        }
+
+    }
+
+    private ArrayList<Question> convertHashMapToQuestion(List<HashMap> mapArrayList) {
+        ArrayList<Question> questions = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
+        for (HashMap hashMap : mapArrayList) {
+            questions.add(mapper.convertValue(hashMap, Question.class));
+        }
+        return questions;
+    }
+
+
     /*public MutableLiveData<List<Team>> getTeamsLiveData() {
         if (teamsLiveData == null) {
             teamsLiveData = new MutableLiveData<>();
@@ -101,12 +271,15 @@ public class DataSource {
 
 
 
-    public TeamLiveData getFirestoreTeamLiveData() {
+    /*public TeamLiveData getFirestoreTeamLiveData() {
         CollectionReference reference = firebaseFirestore
-                .collection("teams");
+                .collection(TEAMS_COLLECTION);
         return new TeamLiveData(reference);
-    }
+    }*/
 
+    /**
+     * listeners for data in cloud
+     */
     public void getFromCloud(){
         getUser(userLiveData.getValue().getName());
         Thread thread = new Thread(new Runnable() {
@@ -130,19 +303,6 @@ public class DataSource {
 
 
 
-    public void test() throws InterruptedException, ExecutionException
-    {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Callable<Integer> callable = new Callable<Integer>() {
-            @Override
-            public Integer call() {
-                return 2;
-            }
-        };
-        Future<Integer> future = executor.submit(callable);
-        // future.get() returns 2 or raises an exception if the thread dies, so safer
-        executor.shutdown();
-    }
 
     private void getUserFromCloud(String username) {
         firebaseFirestore.collection("users")
@@ -164,31 +324,34 @@ public class DataSource {
     }
 
     /**
-     * get User from cloud
+     * listen for user from cloud
      * @param userName
      */
     private void getUser(final String userName) {
-
-
-
-        DocumentReference userReference = firebaseFirestore.collection("users")
+        DocumentReference userReference = firebaseFirestore.collection(USERS_COLLECTION)
                 .document(userName);
 
         userReference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
                 if (error != null) {
-                    Log.w(LOG_NAME, "getUser2: Listen failed.", error);
+                    Log.w(LOG_NAME, "getUser: Listen failed.", error);
                     return;
                 }
                 if (value != null && value.exists()) {
-                    Log.d(LOG_NAME, "getUser2: Current data: " + value.getData());
+                    Log.d(LOG_NAME, "getUser: Current data: " + value.getData());
                     Map<String, Object> userMap = value.getData();
-                    userLiveData.setValue(new LoggedInUser   //get from cloud and set the user to app
-                            ((String)userMap.get("id"),(String)userMap.get("name"), (String)userMap.get( "role")));
+                    LoggedInUser user = new LoggedInUser   //get from cloud and set the user to app
+                            ((String)userMap.get("id"),(String)userMap.get("name"), (String)userMap.get( "role"));
+
+
+                    //add the report to frontend//TODO: decide if update reports now or later
+                    //getReportsFromUser((ArrayList<DocumentReference>) userMap.get("reports"), user);
+
+                    //add the team to frontend
                     getTeamFromUser((DocumentReference) value.getData().get("leaderOfTeam"));
                 } else {
-                    Log.d(LOG_NAME, "getUser2: Current data: null");
+                    Log.d(LOG_NAME, "getUser: Current data: null");
                 }
             }
         });
@@ -214,63 +377,139 @@ public class DataSource {
                 });*/
 
 
-    };
+    }
 
+    /**
+     * convert list of report document references to Report objects for user frontend
+     * @param reportsReferences
+     */
+    private void reportReferencesToReportObjectsForUser(ArrayList<DocumentReference> reportsReferences) {
+        Log.i(LOG_NAME, "reportReferencesToReportObjects executed");
+        if (reportsReferences == null) {
+            new Exception("getTeamFromUser: team reference is null");
+            return;
+        }
+        for (DocumentReference reference : reportsReferences) {
+            reference
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            DocumentSnapshot document = task.getResult();
+                            if (task.isSuccessful()) {
+                                if (document.exists()) {
+                                    Log.d(LOG_NAME, "reportReferencesToReportObjects -> DocumentSnapshot data: " + document.getData());
+                                    Map<String,Object> reportMap = document.getData();
+                                    Report report = new Report();
+                                    report.setDescription((String) reportMap.get("description"));
+                                    report.setId((String) reportMap.get("id"));
+                                    report.setIdLeader((String) reportMap.get("idLeader"));
+                                    report.setQuestionList((ArrayList<Question>) reportMap.get("questionList"));
+                                    reports.add(report);
+                                    Log.d(LOG_NAME, "reportReferencesToReportObjects -> finish one loop ");
+                                } else {
+                                    Log.d(LOG_NAME, "reportReferencesToReportObjects ->No such document");
+                                }
+                            } else {
+                                Log.d(LOG_NAME, "reportReferencesToReportObjects -> get failed with ", task.getException());
+                            }
+                        }
+                    });
+        }
+        Log.d(LOG_NAME, "reportReferencesToReportObjects -> finish all loops");
+    }
+
+    private ArrayList<Report> updatedReportList(ArrayList<Report> reports) {
+        return reports;
+    }
+
+    /**
+     * get Reports From User in cloud and update the user at frontend
+     * @param reportsReferences
+     */
+    private void getReportsFromUser(ArrayList<DocumentReference> reportsReferences, final LoggedInUser user) {
+        Log.i(LOG_NAME, "getReportsFromUser executed");
+        reportReferencesToReportObjectsForUser(reportsReferences);
+
+        //add the user with reports after delay for data to be fetched
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                user.setReports((ArrayList<Report>) reports.clone());
+                reports.clear();
+                Log.i(LOG_NAME, "getReportsFromUser -> reports cleared");
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        userLiveData.setValue(user);
+                    }
+                });
+
+                Log.d(LOG_NAME, "getReportsFromUser ->user live data updated");
+            }
+        }).start();
+
+    }
 
     private void getUserDataOnce(final String userName) {
         final boolean[] dataArrived = new boolean[1];
 
-    //    new Thread(new Runnable() {
-   //         @Override
-   //         public void run() {
-                firebaseFirestore.collection("users")
-                        .document(userName)
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    DocumentSnapshot document = task.getResult();
-                                    Log.i(LOG_NAME, "getUserTeam: get document data: " + document.getData());
-                                    Map<String, Object> userMap = document.getData();
-                                    userLiveData.setValue(new LoggedInUser   //get from cloud and set the user to app
-                                            ((String)userMap.get("id"),(String)userMap.get("name"), (String)userMap.get( "role")));
-                                    getTeamFromUser((DocumentReference) document.get("leaderOfTeam"));
+        //    new Thread(new Runnable() {
+        //         @Override
+        //         public void run() {
+        firebaseFirestore.collection("users")
+                .document(userName)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            Log.i(LOG_NAME, "getUserTeam: get document data: " + document.getData());
+                            Map<String, Object> userMap = document.getData();
+                            userLiveData.setValue(new LoggedInUser   //get from cloud and set the user to app
+                                    ((String)userMap.get("id"),(String)userMap.get("name"), (String)userMap.get( "role")));
+                            getTeamFromUser((DocumentReference) document.get("leaderOfTeam"));
 
-                                } else {
-                                    Log.w(LOG_NAME, "getUserTeam:  failed: ", task.getException());
-                                    task.getException();
-                                }
-                            }
-                        });
-  //      int i = 1000;
-  //      while (i != 0) {
- //           Log.i(LOG_NAME, "getUserTeam, while loop, teamLiveData is " +teamLiveData);
- //           i--;
- //       }
+                        } else {
+                            Log.w(LOG_NAME, "getUserTeam:  failed: ", task.getException());
+                            task.getException();
+                        }
+                    }
+                });
+        //      int i = 1000;
+        //      while (i != 0) {
+        //           Log.i(LOG_NAME, "getUserTeam, while loop, teamLiveData is " +teamLiveData);
+        //           i--;
+        //       }
 
-       //         try {
-       //             Thread.sleep(1500);
-       //         } catch (InterruptedException e) {
+        //         try {
+        //             Thread.sleep(1500);
+        //         } catch (InterruptedException e) {
         //            e.printStackTrace();
         //        }
 
 
-      //      }
-       // }).start();
+        //      }
+        // }).start();
 
 
     };
-
     /**
-     * get Team From User
+     * listen to team in User from cloud
      * @param reference
      */
     private void getTeamFromUser(DocumentReference reference) {
 
-        if (reference == null)
-        {
+        if (reference == null) {
             new Exception("getTeamFromUser: team reference is null");
+            return;
         }
 
         DocumentReference teamReference = firebaseFirestore.document(reference.getPath());
@@ -286,6 +525,7 @@ public class DataSource {
                     Log.d(LOG_NAME, "getTeamFromUser: Current data: " + value.getData());
                     Map<String, Object> teamMap = value.getData();
                     teamLiveData.setValue(new Team((String) teamMap.get("id"),(String) teamMap.get( "name")));
+                    Log.d(LOG_NAME, "getTeamFromUser: teamMap: " + teamMap);
                     crewReferenceList.addAll((List)teamMap.get("crew"));
                     ReferenceToSoldierList(crewReferenceList);
                     Log.i(LOG_NAME, "getTeamFromUser, task.getResult().getData()" + value.getData());
@@ -353,6 +593,8 @@ public class DataSource {
             new Exception("ReferenceToSoldierList: list is empty");
         }
 
+        Log.d(LOG_NAME, "ReferenceToSoldierList executed!!!");
+
         for (DocumentReference reference: referenceList) {
             //Log.d(LOG_NAME, "ReferenceToSoldierList: Current data: " + reference);
             firebaseFirestore.document(reference.getPath())
@@ -363,23 +605,27 @@ public class DataSource {
                                 Log.w(LOG_NAME, "ReferenceToSoldierList: Listen failed.", error);
                                 return;
                             }
-
                             if (value != null && value.exists()) {
-                                Log.d(LOG_NAME, "ReferenceToSoldierList: Current data: " + value.getData());
-                                Map<String, Object> soldierMap = value.getData();
+                                Log.d(LOG_NAME, "ReferenceToSoldierList: soldier data: " + value.getData());
+                                final Map<String, Object> soldierMap = value.getData();
                                 //id name rate comment
-                                Soldier soldier = new Soldier
+                                final Soldier soldier = new Soldier
                                         ((String) soldierMap.get("id"), (String) soldierMap.get("name")
                                                 , (long) soldierMap.get("rate"), (String) soldierMap.get("comment"));
-                                    soldierList.add(soldier);
+
+                                //TODO: decide to update report for fronend now or later
+                                //reportReferencesToReportObjectsForSoldiers((ArrayList<DocumentReference>) soldierMap.get("reports"), soldier);
+                                //updateSoldierListReport(soldier);//add the report so soldier list in background. TODO: delete. won't work for now
+                                soldierList.add(soldier);
+                                soldiersLiveData.setValue(soldierList);
+                                //Log.d(LOG_NAME, "ReferenceToSoldierList: soldier size: " + soldierList.size());
                             } else  {
-                                Log.w(LOG_NAME, "ReferenceToSoldierList: Current data: null");
+                                Log.w(LOG_NAME, "ReferenceToSoldierList: soldier data: null");
                             }
                         }
                     });
         }
-
-        new Thread(new Runnable() {
+        /*new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -400,11 +646,108 @@ public class DataSource {
                     new Exception("ReferenceToSoldierList: soldier list is empty");
                 }
             }
+        }).start();*/
+    }
+
+    /**
+     * convert list of report document references to Report objects for user frontend
+     * @param reportsReferences
+     */
+    private void reportReferencesToReportObjectsForSoldiers(ArrayList<DocumentReference> reportsReferences, final Soldier soldier) {
+        Log.i(LOG_NAME, "reportReferencesToReportObjectsForSoldiers executed");
+        final ArrayList<Report> reports = new ArrayList<>();
+        final ArrayList<Soldier> soldiers = new ArrayList<>();
+        if (reportsReferences == null) {
+            new Exception("getTeamFromUser: team reference is null");
+            return;
+        }
+        for (DocumentReference reference : reportsReferences) {
+            reference
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            DocumentSnapshot document = task.getResult();
+                            if (task.isSuccessful()) {
+                                if (document.exists()) {
+                                    Log.d(LOG_NAME, "reportReferencesToReportObjectsForSoldiers -> DocumentSnapshot data: " + document.getData());
+                                    Map<String,Object> reportMap = document.getData();
+                                    Report report = new Report();
+                                    report.setDescription((String) reportMap.get("description"));
+                                    report.setId((String) reportMap.get("id"));
+                                    report.setIdLeader((String) reportMap.get("idLeader"));
+                                    report.setQuestionList((ArrayList<Question>) reportMap.get("questionList"));
+                                    reports.add(report);
+                                    Log.d(LOG_NAME, "reportReferencesToReportObjectsForSoldiers -> finish one loop ");
+                                } else {
+                                    Log.d(LOG_NAME, "reportReferencesToReportObjectsForSoldiers ->No such document");
+                                }
+                            } else {
+                                Log.d(LOG_NAME, "reportReferencesToReportObjectsForSoldiers -> get failed with ", task.getException());
+                            }
+                        }
+                    });
+        }
+        Log.d(LOG_NAME, "reportReferencesToReportObjectsForSoldiers -> finish all loops");
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(4000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                soldier.setReports(reports);
+                for (int i = 0 ; i < soldierList.size() ; i++) {
+                    if (soldier.getId().equals(soldierList.get(i).getId())) {
+                        soldierList.set(i, soldier);
+                    }
+                }
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        soldiersLiveData.setValue(soldierList);
+                    }
+                });
+            }
+        }).start();
+    }
+    /**
+     * add the soldier after report
+     * @param soldier
+     */
+    private void updateSoldierListReport(final Soldier soldier) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                soldier.setReports((ArrayList<Report>) reports.clone());
+                Log.d(LOG_NAME, "updateSoldierListReport: soldier id: " + soldier.getReports().get(0).getId());
+                reports.clear();
+                for (int i = 0 ; i < soldierList.size() ; i++) {
+                    if (soldier.getId().equals(soldierList.get(i).getId())) {
+                        soldierList.set(i, soldier);
+                    }
+                }
+
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        soldiersLiveData.setValue(soldierList);
+                    }
+                });
+            }
         }).start();
     }
 
 
-    private void deleteSoldier(String id) {
+    public void deleteSoldier(String id) {
 
     }
 
@@ -413,7 +756,7 @@ public class DataSource {
     }
 
 
-
+    //TODO: write data to cloud area
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -427,7 +770,7 @@ public class DataSource {
             createUsers(i+1);
         }*/
 
-        //createTeams();
+        createTeams();
     }
 
 
@@ -455,7 +798,7 @@ public class DataSource {
                     team.put("name", teamName.get(i[0]));
                     team.put("crew", null);
 
-                    Log.i(LOG_NAME, "1. i[0] is " + i[0]);
+                    Log.i(LOG_NAME, "1. i[0] is " + i[0] + " for team " + teamName.get(i[0]));
                     // Add a new document with a generated ID
                     firebaseFirestore.collection("teams")
                             .document(team.get("name").toString())
@@ -465,7 +808,7 @@ public class DataSource {
                                 public void onSuccess(Void Void) {
                                     Log.i(LOG_NAME, "2. i[0] is " + i[0]);
                                     createCrewForTeam(teamName.get(i[0]));
-                                    Log.i(LOG_NAME, "DocumentSnapshot added");
+                                    Log.i(LOG_NAME, "createTeams -> DocumentSnapshot added");
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
@@ -477,7 +820,7 @@ public class DataSource {
                             });
 
                     try {
-                        Thread.sleep(1500);
+                        Thread.sleep(2000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -495,16 +838,23 @@ public class DataSource {
         Thread getCrewThread = new Thread(new Runnable() {
             @Override
             public void run() {
+                crewReferenceList.clear();
                 getCrew();
 
+                /*
+                important sleep!!! waiting for fetching the crew reference list from soldiers collection
+                 */
                 try {
-                    Thread.sleep(1500);
+                    Thread.sleep(6000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
-                Log.i(LOG_NAME, "crewReferenceList is: " + crewReferenceList);
+                Log.i(LOG_NAME, "createCrewForTeam -> crewReferenceList is: " + crewReferenceList);
+                Log.i(LOG_NAME, "createCrewForTeam -> crewReferenceList size: " + crewReferenceList.size());
                 addTheCrew(teamName);
+
+
 
             }
         });
@@ -520,14 +870,15 @@ public class DataSource {
      * @param teamName
      */
     private void addTheCrew(String teamName) {
-        Log.i(LOG_NAME, "addTheCrew execute");
+        Log.i(LOG_NAME, "addTheCrew execute. teamName: " + teamName);
         firebaseFirestore.collection("teams")
                 .document(teamName)
                 .update("crew",crewReferenceList)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.i(LOG_NAME, "DocumentSnapshot successfully updated!");
+                        Log.i(LOG_NAME, "addTheCrew -> DocumentSnapshot successfully updated!");
+                        //crewReferenceList.clear();//TODO: test if this ok
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -553,8 +904,9 @@ public class DataSource {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.i(LOG_NAME, document.getId() + " => " + document.getData());
+                                Log.i(LOG_NAME, "getCrew -> document.getId() ->" + document.getId() + " => " + document.getData());
                                 crewReferenceList.add(document.getReference());
+                                Log.i(LOG_NAME, "getCrew -> crewReferenceList.size " + crewReferenceList.size());
                             }
                         } else {
                             Log.i(LOG_NAME, "getCrew: Error getting documents: ", task.getException());
@@ -576,7 +928,7 @@ public class DataSource {
                 users.put("id", String.valueOf(1001+ counter));
                 users.put("name","user" + counter);
                 users.put("role","C");
-                getMyTeamReference("35");//TODO
+                getMyTeamReference("35");
                 do {
                     try {
                         Thread.sleep(100);
@@ -768,115 +1120,13 @@ public class DataSource {
 
 
 
-    public void getFromCloud2(LoggedInUser user){
-
-        firebaseFirestore
-                .collection("teams").document(user.getLeaderOfTeam().getId())
-                .addSnapshotListener(new EventListener<DocumentSnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                        if (error != null){
-                            Log.i("data source", "listen error", error);
-                            new Exception("problem");
-                            return;
-                        }
-                        List<Team> teamsTemp = new ArrayList<>();
-                        Team team;
-
-
-                         /*while (DocumentSnapshot doc : value) {
-                             if (doc.get("name") != null) {
-                                 team = new Team();
-                                 team.setName(doc.getString("name"));
-                                 team.setId(doc.getId());
-                                 team.setCrew((ArrayList)doc.get("crew"));
-                                 teamsTemp.add(team);
-                             }
-                         }*/
-                    }
-                });
-
-    }
-
 
 
 
 
     ////////////////////
 
-    /*
-    public void updateTeams(){
-         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-         CollectionReference collectionReference = db.collection("teams");
-         Task<QuerySnapshot> querySnapshotTask = collectionReference.get();
-         querySnapshotTask.addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-             @Override
-             public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                 HashMap map;
-                 if(task.isSuccessful()){
-                     for (QueryDocumentSnapshot document : task.getResult()) {
-                         Log.i("main activity", document.getId() + " => "
-                                 + document.getData() + " and: " + document.getData().get("crew"));
-                         map = (HashMap) document.getData();
-                         updateSoldiers(map);
-                         //Log.i("main activity", "document2...name is " + document2.get().getResult().getData().get("name"));
-                         //Log.i("main activity", "document2 is " + document2);
-                     }
-                 } else {
-                     Log.i("main activity", "get failed with " + task.getException());
-                 }
-             }
-         });
-     }
-
-
-    private void updateSoldiers(HashMap<String,Object> map) {
-        final DocumentReference reference = (DocumentReference)map.get("crew");
-        final Soldier[] soldier = new Soldier[1];
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                reference.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            task.getResult();
-                            Log.i("main activity", task.getResult() + "\n => get data: "
-                                    + task.getResult().getData() +
-                                    "\n => get name: " + task.getResult().getData().get("name"));
-                            soldier[0] = convertDatatoSoldier(task.getResult().getData());
-                            Log.i("main activity", "\n soldier: " + soldier[0].toString());
-                        } else {
-                            Log.i("main activity", "get failed with " + task.getException());
-                        }
-                    }
-                });
-
-
-
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-
-            }
-        }).start();
-        Log.i("main activity", " \n soldier" + soldier[0].toString());
-    }
-
-    private Soldier convertDatatoSoldier(Map<String,Object> data){
-        Soldier soldier = new Soldier();
-        soldier.setName((String) data.get("name"));
-        soldier.setRate((int) data.get("rate"));
-        soldier.setComment((String) data.get("comment"));
-        return soldier;
-    }
-
-    */
 
 
 

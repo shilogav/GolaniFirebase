@@ -14,7 +14,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +25,7 @@ import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.shilo.golanimanage.R;
+import com.shilo.golanimanage.Utility;
 import com.shilo.golanimanage.databinding.FragmentSoldierListBinding;
 import com.shilo.golanimanage.mainactivity.adapters.RecyclerAdapter;
 import com.shilo.golanimanage.mainactivity.model.Soldier;
@@ -83,39 +87,61 @@ public class SoldierListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              final Bundle savedInstanceState) {
+        //data binding
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_soldier_list, container, false);
         View view = binding.getRoot();
         if (savedInstanceState != null) {
             return view;
         }
-        //data binding
+
+        //progress bar
+        progressBarManage();
+
 
         //view model
-        viewModel = new ViewModelProvider(this).get(SoldierListViewModel.class);
 
+        viewModel = new ViewModelProvider(this).get(SoldierListViewModel.class);
         userLiveData = viewModel.getUser(getActivity());
+        userLiveData.observe(getViewLifecycleOwner(), new Observer<LoggedInUser>() {
+            @Override
+            public void onChanged(LoggedInUser user) {
+                Utility.saveUserForSharedPref(getActivity(),user);
+            }
+        });
+
         Toast.makeText(getContext(),"main activity version 1. user is " + userLiveData.getValue().toString(),Toast.LENGTH_LONG).show();
         Log.i("SoldierListFragment", "user is " + userLiveData.getValue().toString());
+
+
+        manageBackKey(view);
+
 
         //viewModel.init();
 
         //initialize
         initRecyclerView(savedInstanceState);
 
-        /*viewModel.getTeamlist().observe(this, new Observer<List<Team>>() {
+        /*
+
+        viewModel.getTeamlist().observe(this, new Observer<List<Team>>() {
             @Override
             public void onChanged(List<Team> teams) {
                 Log.i("main activity", "on changed called");
                 adapter.setSoldiers(teams.get(0).getCrew());
             }
-        });*/
+        });
 
-        /**
+        /*
+         * write data to cloud
+         */
+        viewModel.toCloud();
+
+        /*
          * general fetch method. to be deleted
          */
         viewModel.getCloud();
 
-        /**
+        /*
          * observer for soldiers
          */
         viewModel.getSoldiersLiveData().observe(getViewLifecycleOwner(), new Observer<List<Soldier>>() {
@@ -131,6 +157,50 @@ public class SoldierListFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void manageBackKey(View view) {
+        view.setFocusableInTouchMode(true);
+        view.requestFocus();
+        view.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if ( keyCode == KeyEvent.KEYCODE_BACK) {
+                    Log.i("SoldierListFragment","back key pressed");
+                    System.exit(0);
+                    return false;
+                }
+                return false;
+            }
+        });
+    }
+
+    /**
+     * progressBarManage
+     */
+    private void progressBarManage() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                binding.layoutProgressBar.setVisibility(View.VISIBLE);
+                binding.recyclerViewSoldiers.setVisibility(View.INVISIBLE);
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                //binding.progressBar.setVisibility(View.GONE);
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        binding.layoutProgressBar.setVisibility(View.GONE);
+                        binding.recyclerViewSoldiers.setVisibility(View.VISIBLE);
+                    }
+                });
+
+            }
+        }).start();
     }
 
     /**

@@ -9,5 +9,5 @@
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context=".mainactivity.fragments.ReportFragment"
+    tools:context=".mainactivity.fragments.ReportFragmentDummy"
     tools:listitem="@layout/fragment_report" />

@@ -1,21 +1,35 @@
 package com.shilo.golanimanage.mainactivity.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class Soldier implements Serializable {
     private String id;
     private String name;
     private long rate;//summery rate
     private String comment;
+    private ArrayList<Report> reports;
 
     public Soldier() {
+        reports = new ArrayList<>();
     }
 
     public Soldier(String id, String name, long rate, String comment) {
+        new Soldier();
         this.id = id;
         this.name = name;
         this.rate = rate;
         this.comment = comment;
+    }
+
+    public ArrayList<Report> getReports() {
+        return reports;
+    }
+
+
+
+    public void setReports(ArrayList<Report> reports) {
+        this.reports = reports;
     }
 
     public Soldier(String name) {
@@ -42,7 +56,7 @@ public class Soldier implements Serializable {
         return rate;
     }
 
-    public void setRate(int rate) {
+    public void setRate(long rate) {
         this.rate = rate;
     }
 
