@@ -1,9 +1,14 @@
 apply plugin: 'java-library'
 
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.google.firebase:firebase-admin:7.0.1'
-    //implementation 'com.google.firebase:firebase-firestore:22.0.0'
+
+
+
+    implementation files('libs/poi-3.12-android-a.jar')
+    implementation files('libs/poi-ooxml-schemas-3.12-20150511-a.jar')
 }
 
 sourceCompatibility = "1.7"

@@ -10,8 +10,12 @@ import com.shilo.golanimanage.mainactivity.model.Soldier;
 import com.shilo.golanimanage.mainactivity.model.Team;
 import com.shilo.golanimanage.model.LoggedInUser;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.MutableLiveData;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -58,6 +62,10 @@ public class Repository {
         dataSource.toCloud();
     }
 
+    public void createSoldiers(ArrayList<Soldier> soldiers) {
+        dataSource.createSoldiers(soldiers);
+    }
+
     /**
      * deprecated method
      * @return
@@ -85,5 +93,9 @@ public class Repository {
     public void setReport(Report report, Soldier soldier) {
         this.report = report;
         dataSource.setReport(report, soldier, userLiveData.getValue());
+    }
+
+    public void deleteSoldier(Soldier soldier, String reason){
+        dataSource.deleteSoldier(soldier,reason);
     }
 }

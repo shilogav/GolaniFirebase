@@ -10,6 +10,7 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -68,7 +69,17 @@ dependencies {
     //implementation 'com.google.cloud:google-cloud-storage:1.113.1'
 
     //convert map
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
+
+    //poi
+    //implementation 'org.apache.poi:poi-ooxml:3.17'
+    implementation files('libs/poi-3.12-android-a.jar')
+    implementation files('libs/poi-ooxml-schemas-3.12-20150511-a.jar')
+    //implementation files('libs/commons-collections4-4.1.jar')
+    //implementation files('libs/commons-codec-1.10.jar')
+
+
+
 
 
     // Support for Java 8 features

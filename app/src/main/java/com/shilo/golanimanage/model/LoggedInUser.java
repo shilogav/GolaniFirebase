@@ -21,22 +21,26 @@ public class LoggedInUser {
     private String userId;
     private String name;
     private String role;
-    private Team leaderOfTeam;
+    private ArrayList<String> leaderOfTeam;
     private ArrayList<Report> reports;
 
+    {//init block
+        leaderOfTeam = new ArrayList<>();
+        reports = new ArrayList<>();
+    }
+
     public LoggedInUser(String userId, String displayName, String role) {
-        new LoggedInUser();
         this.userId = userId;
         this.name = displayName;
         this.role = role;
     }
 
     public LoggedInUser(String displayName) {
-        new LoggedInUser();
         this.name = displayName;
     }
 
     public LoggedInUser() {
+        leaderOfTeam = new ArrayList<>();
         reports = new ArrayList<>();
     }
 
@@ -60,11 +64,11 @@ public class LoggedInUser {
         this.role = role;
     }
 
-    public Team getLeaderOfTeam() {
+    public ArrayList<String> getLeaderOfTeam() {
         return leaderOfTeam;
     }
 
-    public void setLeaderOfTeam(Team leaderOfTeam) {
+    public void setLeaderOfTeam(ArrayList<String> leaderOfTeam) {
         this.leaderOfTeam = leaderOfTeam;
     }
 

@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ public class SoldierDetailsFragment extends Fragment implements RetirementDialog
     public static final String PLAIN = "plain";
     public static final String INTERVIEW = "interview";
     public static final String REPORT_TYPE = "reportType";
+    private Soldier soldier;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -84,8 +86,9 @@ public class SoldierDetailsFragment extends Fragment implements RetirementDialog
         //view model
         viewModel = new ViewModelProvider(this).get(SoldierListViewModel.class);
 
+        soldier =(Soldier) getArguments().getSerializable("soldier");
         //update the data binder for soldiers details
-        binding.setSoldier((Soldier) getArguments().getSerializable("soldier"));
+        binding.setSoldier(soldier);
 
         ///////////////////////////
         //click listeners
@@ -120,17 +123,38 @@ public class SoldierDetailsFragment extends Fragment implements RetirementDialog
             @Override
             public void onClick(View v) {
 
-                Toast.makeText(getContext(), "should open dialog manager", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getContext(), "should open dialog manager", Toast.LENGTH_SHORT).show();
                 RetirementDialog dialog = new RetirementDialog();
                 dialog.show(getChildFragmentManager(), null);
 
 
             }
         });
-
+        manageBackKey(view);
 
         ////////////
         return view;
+    }
+
+    Fragment fragment = this;
+    private void manageBackKey(View view) {
+        //view.setFocusableInTouchMode(true);
+        //view.requestFocus();
+        view.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if ( keyCode == KeyEvent.KEYCODE_BACK) {
+                    Log.i("SoldierDetailsFragment","back key pressed");
+                    FragmentManager fm = getActivity().getSupportFragmentManager();
+                    Log.i("SoldierDetailsFragment","getParentFragmentManager is " + fm);
+                    FragmentTransaction fragmentTransaction = fm.beginTransaction();
+                    fragmentTransaction.remove(fragment);
+                    fragmentTransaction.commit();
+                    return false;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -139,26 +163,35 @@ public class SoldierDetailsFragment extends Fragment implements RetirementDialog
     }
 
     private void loadFragment(Fragment fragment) {
-        FragmentManager fm = getParentFragmentManager();
+        FragmentManager fm = getActivity().getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fm.beginTransaction();
         fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.add(R.id.content_frame,fragment);
+        fragmentTransaction.replace(R.id.content_frame,fragment);
         fragmentTransaction.commit(); // save the changes
         Log.i("MainActivityV3", "fragmentTransaction.commit()");
     }
 
     @Override
     public void onDialogIndependentRetirement(DialogFragment dialog) {
+        viewModel.deleteSoldier(soldier,"פרישה עצמית");
         Toast.makeText(getContext(), "independent",Toast.LENGTH_SHORT).show();
+        dialog.dismiss();
+        getParentFragmentManager().popBackStack();
     }
 
     @Override
     public void onDialogMedicalRetirement(DialogFragment dialog) {
+        viewModel.deleteSoldier(soldier,"פרישה רפואית");
         Toast.makeText(getContext(), "medical",Toast.LENGTH_SHORT).show();
+        dialog.dismiss();
+        getParentFragmentManager().popBackStack();
     }
 
     @Override
-    public void onDialogInitiatedRetirement(DialogFragment dizlog) {
+    public void onDialogInitiatedRetirement(DialogFragment dialog) {
+        viewModel.deleteSoldier(soldier,"פרישה יזומה");
         Toast.makeText(getContext(), "initiated",Toast.LENGTH_SHORT).show();
+        dialog.dismiss();
+        getParentFragmentManager().popBackStack();
     }
 }

@@ -2,6 +2,7 @@ package com.shilo.golanimanage.login.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.shilo.golanimanage.model.LoggedInUser;
@@ -55,6 +56,7 @@ public class LoginRepository {
     }
 
     public Result<LoggedInUser> login(AppCompatActivity activity, String username, String password) {
+        Log.i("LoginRepository", "login executed");
         context = activity;
         // handle login
         Result<LoggedInUser> result = dataSource.login(activity, username, password);

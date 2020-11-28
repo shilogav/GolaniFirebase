@@ -122,8 +122,8 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
     }
 
     private void manageKeyBack(View view) {
-        view.setFocusableInTouchMode(true);
-        view.requestFocus();
+        //view.setFocusableInTouchMode(true);
+        //view.requestFocus();
         view.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -211,9 +211,9 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
         binding.questionList.setHasFixedSize(true);
         binding.questionList.setAdapter(adapter);
         //adapter.setQuestions(report.getQuestionList() );
-        //report = new Report();
-        //report.setQuestionList(fillReport());
-        //adapter.setQuestions(report.getQuestionList());
+        report = new Report();
+        report.setQuestionList(fillReport());
+        adapter.setQuestions(report.getQuestionList());
         viewModel.getReport(soldier, reportType).observe(getViewLifecycleOwner(), new Observer<Report>() {
             @Override
             public void onChanged(Report report) {
@@ -252,7 +252,9 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
                     @Override
                     public void run() {
                         if (isNewReport) {
-                            binding.saveFab.show();
+                            if (!user.getName().contains("admin") && !user.getName().contains("Admin")) {
+                                binding.saveFab.show();
+                            }
                         } else {
                             binding.saveFab.hide();
                         }

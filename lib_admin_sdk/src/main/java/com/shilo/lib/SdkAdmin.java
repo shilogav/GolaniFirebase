@@ -15,15 +15,15 @@ import java.util.concurrent.ExecutionException;
 
 public class SdkAdmin {
     public static final String UID = UUID.randomUUID().toString();
-    public static void main(String[] args) throws IOException
+    /*public static void main(String[] args) throws IOException
             , ExecutionException, InterruptedException, FirebaseAuthException {
-        FileInputStream serviceAccount = new FileInputStream("\u202AI:\\Projects\\service acoount key- Golani Manage\\ServiceAccountKey.json");
-
+        //FileInputStream serviceAccount = new FileInputStream("\u202AI:\\Projects\\GolaniManage\\app\\ServiceAccountKey.json");
+        FileInputStream serviceAccount = new FileInputStream("I:\\Projects\\GolaniManage\\app\\ServiceAccountKey.json");
         //using json service account
-        /*FirebaseOptions options = new FirebaseOptions.Builder()
+        FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .setDatabaseUrl("https://fir-users-d9685.firebaseio.com")
-                .build();*/
+                .build();
 
         FirebaseApp.initializeApp();
 
@@ -42,5 +42,5 @@ public class SdkAdmin {
         String customToken = FirebaseAuth.getInstance().createCustomToken(UID,additionalClaims);
 
         System.out.println("the custom token is " + customToken);
-    }
+    }*/
 }

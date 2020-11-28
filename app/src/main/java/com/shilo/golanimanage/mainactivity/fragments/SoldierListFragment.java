@@ -30,6 +30,8 @@ import com.shilo.golanimanage.databinding.FragmentSoldierListBinding;
 import com.shilo.golanimanage.mainactivity.adapters.RecyclerAdapter;
 import com.shilo.golanimanage.mainactivity.model.Soldier;
 import com.shilo.golanimanage.model.LoggedInUser;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +40,7 @@ import java.util.List;
  * Use the {@link SoldierListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SoldierListFragment extends Fragment {
+public class SoldierListFragment extends Fragment implements Serializable {
     private SoldierListViewModel viewModel;
     private MutableLiveData<LoggedInUser> userLiveData;
     private RecyclerAdapter adapter;
@@ -101,6 +103,7 @@ public class SoldierListFragment extends Fragment {
         //view model
 
         viewModel = new ViewModelProvider(this).get(SoldierListViewModel.class);
+        viewModel.setActivity(getActivity());
         userLiveData = viewModel.getUser(getActivity());
         userLiveData.observe(getViewLifecycleOwner(), new Observer<LoggedInUser>() {
             @Override
@@ -109,7 +112,7 @@ public class SoldierListFragment extends Fragment {
             }
         });
 
-        Toast.makeText(getContext(),"main activity version 1. user is " + userLiveData.getValue().toString(),Toast.LENGTH_LONG).show();
+        //Toast.makeText(getContext(),"main activity version 1. user is " + userLiveData.getValue().toString(),Toast.LENGTH_LONG).show();
         Log.i("SoldierListFragment", "user is " + userLiveData.getValue().toString());
 
 
@@ -120,16 +123,6 @@ public class SoldierListFragment extends Fragment {
 
         //initialize
         initRecyclerView(savedInstanceState);
-
-        /*
-
-        viewModel.getTeamlist().observe(this, new Observer<List<Team>>() {
-            @Override
-            public void onChanged(List<Team> teams) {
-                Log.i("main activity", "on changed called");
-                adapter.setSoldiers(teams.get(0).getCrew());
-            }
-        });
 
         /*
          * write data to cloud
@@ -160,14 +153,15 @@ public class SoldierListFragment extends Fragment {
     }
 
     private void manageBackKey(View view) {
-        view.setFocusableInTouchMode(true);
-        view.requestFocus();
+        //view.setFocusableInTouchMode(true);
+        //view.requestFocus();
         view.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if ( keyCode == KeyEvent.KEYCODE_BACK) {
                     Log.i("SoldierListFragment","back key pressed");
-                    System.exit(0);
+                    System.exit(100);
+                    Log.i("SoldierListFragment","System.exit");
                     return false;
                 }
                 return false;
@@ -186,7 +180,7 @@ public class SoldierListFragment extends Fragment {
                 binding.layoutProgressBar.setVisibility(View.VISIBLE);
                 binding.recyclerViewSoldiers.setVisibility(View.INVISIBLE);
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(4000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -241,7 +235,7 @@ public class SoldierListFragment extends Fragment {
         adapter.setOnRVClickListener(new RecyclerAdapter.RecyclerViewClickListener() {
             @Override
             public void onclick(Soldier soldier) {
-                Toast.makeText(getContext(),"typed soldier: " + soldier.getName(), Toast.LENGTH_LONG).show();
+                //Toast.makeText(getContext(),"typed soldier: " + soldier.getName(), Toast.LENGTH_LONG).show();
 
                 Log.i("SoldierListFragment", "onclick()");
                 loadFragment(soldier);
@@ -269,11 +263,12 @@ public class SoldierListFragment extends Fragment {
         fragment.setArguments(bundle);
 // create a FragmentManager
         FragmentManager fm = getParentFragmentManager();
+        fm = getActivity().getSupportFragmentManager();
 // create a FragmentTransaction to begin the transaction and replace the Fragment
         FragmentTransaction fragmentTransaction = fm.beginTransaction();
 // replace the FrameLayout with new Fragment
         fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.add(R.id.content_frame,fragment);
+        fragmentTransaction.replace(R.id.content_frame,fragment);
         //fragmentTransaction.addToBackStack("SoldierDetailsFragment");
         fragmentTransaction.commit(); // save the changes
         Log.i("SoldierListFragment", "fragmentTransaction.commit()");

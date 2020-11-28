@@ -18,6 +18,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.shilo.golanimanage.Utility;
 import com.shilo.golanimanage.model.LoggedInUser;
 
 import java.io.IOException;
@@ -47,7 +48,7 @@ public class LoginDataSource {
     //firestore
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public static final String Token = "eyJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJodHRwczovL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbS9nb29nbGUuaWRlbnRpdHkuaWRlbnRpdHl0b29sa2l0LnYxLklkZW50aXR5VG9vbGtpdCIsImNsYWltcyI6eyJwcmVtaXVtQWNjb3VudCI6dHJ1ZX0sImV4cCI6MTYwMzI4MzMwMCwiaWF0IjoxNjAzMjc5NzAwLCJpc3MiOiJmaXJlYmFzZS1hZG1pbnNkay00ZTBmekBmaXItdXNlcnMtZDk2ODUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay00ZTBmekBmaXItdXNlcnMtZDk2ODUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJ1aWQiOiJhZWFmMDQ3Zi1kYTJlLTQwMGYtYWNiMS04ZDdmODg3Mzc3ZDMifQ.RM8Bg4ZPXjdw7j_yiN-fs4-HYGohJ8n1lKTROsusolW4h_3D0ZtDn6AP-YpBKjX-1_Bv2tclaEdprT3ZiRRqkqPOZW1PlnFhwV2LL5O2szlz9kneEqpN9knPLWl44KfaNlu1CBENjHeNbPhEuRdWMd4fIm0GSJEwq60wbHP4Pnb-z8sfAinwzIKg2KLTefH_l8COY9PuK4xSV_O03T8qmw4nGr5_yWGourzPRhJgmbJqbhbogFHqnWS1SGdnZw2VWEnH7T3woGA9iMtT6qmlPWfu5Mp3JRr6Xl2rnj36sF4_4Fzka9GmvjYB6u-z9I27kicZ_awT-EFdM9nziMTHlA";
+    public static final String Token = "eyJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJodHRwczovL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbS9nb29nbGUuaWRlbnRpdHkuaWRlbnRpdHl0b29sa2l0LnYxLklkZW50aXR5VG9vbGtpdCIsImNsYWltcyI6eyJwcmVtaXVtQWNjb3VudCI6dHJ1ZX0sImV4cCI6MTYwNTgxMjE5OSwiaWF0IjoxNjA1ODA4NTk5LCJpc3MiOiJmaXJlYmFzZS1hZG1pbnNkay00ZTBmekBmaXItdXNlcnMtZDk2ODUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay00ZTBmekBmaXItdXNlcnMtZDk2ODUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJ1aWQiOiIxM2ZkYzkyZi00MTAzLTRmZDktYTU5MC0yMjNhN2JkOWU2ODcifQ.tswS-mz-T6dTFKIo-I-6P9FZhknR3IGYLyQIJbGq1JXfcXN-Y39u6hL_6ljTSUqsqIc-MxGdq8AtcWZa3gEAlekBzspwaQnR7deIe9b-cBmziDO2lWPLOcp3BkkVAKaty9wIge0OHycwrPpQWrokII3dP0P6mSQKCLwsrzHiL0eAEt5mKj_QhM28jrCGPKvZ2tBE6ZitJF7xTCOD5P76_0-bPTPAIeFM1_J7G0UPYBPAArscP2U5So4MRjz42TSujMtkIj7ZWdJB4Ei5JTMVk9tHTIgi5ctcGmuKa0aBPZKzNUKfy0mZesWTKHghBDDiJB-E2ZI-_lWzd8svWPj1GQ";
     public static LoginDataSource getInstance(){
         if (instance == null){
             instance = new LoginDataSource();
@@ -62,7 +63,8 @@ public class LoginDataSource {
      * @param username
      * @return
      */
-    public Result<LoggedInUser> login(final Activity activity, String username, String password) {
+    public Result<LoggedInUser> login(final Activity activity, final String username, String password) {
+        Log.i("LoginDataSource", "login executed");
         this.activity = activity;
         //TODO: finish the authentication
         //firebaseAuth(activity,password);
@@ -70,6 +72,8 @@ public class LoginDataSource {
         //userID = UUID.randomUUID().toString();
         ////////////////////////
         mUser = new LoggedInUser(username);
+        Log.i("LoginDataSource", "firebaseAuthCustom execute");
+        firebaseAuthCustom();
                 /*new LoggedInUser(
                         userID,
                         username, username.equals("admin")? ADMIN: TEAM_LEADER);*/
@@ -92,8 +96,13 @@ public class LoginDataSource {
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         mUser.setUserId(documentSnapshot.getString("id"));
                         mUser.setRole(documentSnapshot.getString("role"));
-                        mUser.setLeaderOfTeam(documentSnapshot.get("leaderOfTeam"));
-                        saveUserForSharedPref(mUser);
+                        if (username.contains("admin") || username.contains("Admin")) {
+                            mUser.setLeaderOfTeam(documentSnapshot.get("leaderOfTeam"));
+                        } else {
+
+                        }
+
+                        Utility.saveUserForSharedPref(mUser);
                         Log.i("LoginDataSource -> fetched user: ", mUser.toString());
                     }
                 });*/
@@ -152,6 +161,16 @@ public class LoginDataSource {
         mAuth = FirebaseAuth.getInstance();
         Log.i("auth", "firebaseAuth2 execute");
         mAuth.signInWithCustomToken(Token)
+                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+                        Log.d("auth", "signInWithCustomToken:success");
+                        currentUser = mAuth.getCurrentUser();
+                        Log.i("auth", "currentUser is " + currentUser);
+                        Log.i("auth", "mAuth.getUid() is " + mAuth.getUid());
+                        userID = mAuth.getUid();
+                    }
+                })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
@@ -159,9 +178,7 @@ public class LoginDataSource {
                     }
                 });
 
-        currentUser = mAuth.getCurrentUser();
-        Log.i("auth", "mAuth.getUid() is " + mAuth.getUid());
-        userID = mAuth.getUid();
+
     }
 
     public void logout() {

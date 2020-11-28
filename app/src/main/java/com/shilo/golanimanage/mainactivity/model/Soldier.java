@@ -3,6 +3,8 @@ package com.shilo.golanimanage.mainactivity.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import androidx.annotation.Nullable;
+
 public class Soldier implements Serializable {
     private String id;
     private String name;
@@ -66,5 +68,10 @@ public class Soldier implements Serializable {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return id.equals(((Soldier) obj).getId());
     }
 }

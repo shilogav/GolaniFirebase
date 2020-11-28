@@ -2,6 +2,8 @@ package com.shilo.golanimanage.mainactivity.data;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.res.AssetManager;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -20,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.shilo.golanimanage.Utility;
 import com.shilo.golanimanage.mainactivity.livedata.TeamLiveData;
 import com.shilo.golanimanage.mainactivity.model.Question;
 import com.shilo.golanimanage.mainactivity.model.Report;
@@ -27,9 +30,22 @@ import com.shilo.golanimanage.mainactivity.model.Soldier;
 import com.shilo.golanimanage.mainactivity.model.Team;
 import com.shilo.golanimanage.model.LoggedInUser;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -101,6 +117,9 @@ public class DataSource {
     public MutableLiveData<Team> getTeamLiveData() {
         return teamLiveData;
     }
+
+    /////////////////////////////////////////////////////
+    //report
 
     public MutableLiveData<Report> getReportLiveData(Soldier soldier, String reportType) {
         getReportFromCloud(soldier, reportType);
@@ -223,10 +242,13 @@ public class DataSource {
                                 if (document.exists()) {
                                     Log.d(LOG_NAME, "getReportsByReference -> DocumentSnapshot data: " + document.getData());
                                     Map<String, Object> reportTemp = document.getData();
-                                    List<Question> questions = convertHashMapToQuestion((List<HashMap>) reportTemp.get("questionList"));
-                                    if (reportTemp.get("idSoldier").equals(soldier.getId())
-                                            && reportTemp.get("idLeader").equals(userLiveData.getValue().getUserId())
-                                     && reportTemp.get("description").equals(reportType)) {
+                                    if (reportTemp.get("idSoldier").equals(soldier.getId()) //check for specific soldier report
+                                            && (reportTemp.get("idLeader").equals(userLiveData.getValue().getUserId())  //check for specific user report
+                                            || (userLiveData.getValue().getUserId().contains("Admin") //if Admin should see reports
+                                            || (userLiveData.getValue().getUserId().contains("admin")))) //if admin should see reports
+                                            && reportTemp.get("description").equals(reportType)) //check for plain or interview report
+                                    {
+                                        List<Question> questions = convertHashMapToQuestion((List<HashMap>) reportTemp.get("questionList"));
                                         Report report = new Report((String) reportTemp.get("description")
                                                 ,(String) reportTemp.get("id"),questions
                                                 ,(String) reportTemp.get("idLeader"),(String) reportTemp.get("idSoldier"));
@@ -257,6 +279,7 @@ public class DataSource {
         return questions;
     }
 
+    ///////////////////////////////////////////////////////
 
     /*public MutableLiveData<List<Team>> getTeamsLiveData() {
         if (teamsLiveData == null) {
@@ -281,11 +304,12 @@ public class DataSource {
      * listeners for data in cloud
      */
     public void getFromCloud(){
-        getUser(userLiveData.getValue().getName());
+        soldierList.clear();
+        soldiersLiveData.setValue(soldierList);
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                //getUserTeam(userLiveData.getValue().getName());
+                getUser(userLiveData.getValue().getName());//TODO:should execute
                 Log.i(LOG_NAME, "userLiveData.getValue().getName() is: " + userLiveData.getValue().getName());
             }
         });
@@ -343,13 +367,21 @@ public class DataSource {
                     Map<String, Object> userMap = value.getData();
                     LoggedInUser user = new LoggedInUser   //get from cloud and set the user to app
                             ((String)userMap.get("id"),(String)userMap.get("name"), (String)userMap.get( "role"));
-
+                    userLiveData.setValue(user);
 
                     //add the report to frontend//TODO: decide if update reports now or later
                     //getReportsFromUser((ArrayList<DocumentReference>) userMap.get("reports"), user);
 
                     //add the team to frontend
-                    getTeamFromUser((DocumentReference) value.getData().get("leaderOfTeam"));
+                    Object object = value.getData().get("leaderOfTeam");
+                    ArrayList <DocumentReference> listTemp = new ArrayList<>();
+                    if (object instanceof DocumentReference) {
+                        listTemp.add((DocumentReference) object);
+                        getTeamFromUser(listTemp);
+                    } else if (object instanceof ArrayList){
+                        getTeamFromUser((ArrayList<DocumentReference>) value.getData().get("leaderOfTeam"));
+                    }
+
                 } else {
                     Log.d(LOG_NAME, "getUser: Current data: null");
                 }
@@ -457,85 +489,49 @@ public class DataSource {
 
     }
 
-    private void getUserDataOnce(final String userName) {
-        final boolean[] dataArrived = new boolean[1];
-
-        //    new Thread(new Runnable() {
-        //         @Override
-        //         public void run() {
-        firebaseFirestore.collection("users")
-                .document(userName)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            Log.i(LOG_NAME, "getUserTeam: get document data: " + document.getData());
-                            Map<String, Object> userMap = document.getData();
-                            userLiveData.setValue(new LoggedInUser   //get from cloud and set the user to app
-                                    ((String)userMap.get("id"),(String)userMap.get("name"), (String)userMap.get( "role")));
-                            getTeamFromUser((DocumentReference) document.get("leaderOfTeam"));
-
-                        } else {
-                            Log.w(LOG_NAME, "getUserTeam:  failed: ", task.getException());
-                            task.getException();
-                        }
-                    }
-                });
-        //      int i = 1000;
-        //      while (i != 0) {
-        //           Log.i(LOG_NAME, "getUserTeam, while loop, teamLiveData is " +teamLiveData);
-        //           i--;
-        //       }
-
-        //         try {
-        //             Thread.sleep(1500);
-        //         } catch (InterruptedException e) {
-        //            e.printStackTrace();
-        //        }
-
-
-        //      }
-        // }).start();
-
-
-    };
     /**
      * listen to team in User from cloud
-     * @param reference
+     * @param list
      */
-    private void getTeamFromUser(DocumentReference reference) {
-
-        if (reference == null) {
-            new Exception("getTeamFromUser: team reference is null");
+    private void getTeamFromUser(ArrayList<DocumentReference> list) {
+        final List<DocumentReference> crewReferenceList = new ArrayList<>();
+        if (list == null) {
+            new Exception("getTeamFromUser: team list is null");
             return;
         }
 
-        DocumentReference teamReference = firebaseFirestore.document(reference.getPath());
+        for (DocumentReference reference : list) {
+            DocumentReference teamReference = firebaseFirestore.document(reference.getPath());
 
-        teamReference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                if (error != null) {
-                    Log.w(LOG_NAME, "getTeamFromUser: Listen failed.", error);
-                    return;
+            teamReference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                @Override
+                public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                    if (error != null) {
+                        Log.w(LOG_NAME, "getTeamFromUser: Listen failed.", error);
+                        return;
+                    }
+                    if (value != null && value.exists()) {
+                        Log.d(LOG_NAME, "getTeamFromUser: Current data: " + value.getData());
+                        Map<String, Object> teamMap = value.getData();
+                        teamLiveData.setValue(new Team((String) teamMap.get("id"),(String) teamMap.get( "name")));
+                        LoggedInUser user = userLiveData.getValue();
+                        user.getLeaderOfTeam().add((String) teamMap.get("id"));
+                        userLiveData.setValue(user);
+                        Log.d(LOG_NAME, "getTeamFromUser: teamMap: " + teamMap);
+                        crewReferenceList.addAll((List)teamMap.get("crew"));
+                        //soldierList.clear();//maybe can be cleared
+                        ReferenceToSoldierList(crewReferenceList);
+                        Log.i(LOG_NAME, "getTeamFromUser, task.getResult().getData()" + value.getData());
+                        Log.i(LOG_NAME, "getTeamFromUser, teamLiveData: " + teamLiveData.getValue());
+                        //getCrewFromTeam((DocumentReference) teamMap.get("crew"));
+                    } else {
+                        Log.w(LOG_NAME, "getTeamFromUser: Current data: null");
+                    }
                 }
-                if (value != null && value.exists()) {
-                    Log.d(LOG_NAME, "getTeamFromUser: Current data: " + value.getData());
-                    Map<String, Object> teamMap = value.getData();
-                    teamLiveData.setValue(new Team((String) teamMap.get("id"),(String) teamMap.get( "name")));
-                    Log.d(LOG_NAME, "getTeamFromUser: teamMap: " + teamMap);
-                    crewReferenceList.addAll((List)teamMap.get("crew"));
-                    ReferenceToSoldierList(crewReferenceList);
-                    Log.i(LOG_NAME, "getTeamFromUser, task.getResult().getData()" + value.getData());
-                    Log.i(LOG_NAME, "getTeamFromUser, teamLiveData: " + teamLiveData.getValue());
-                    //getCrewFromTeam((DocumentReference) teamMap.get("crew"));
-                } else {
-                    Log.w(LOG_NAME, "getTeamFromUser: Current data: null");
-                }
-            }
-        });
+            });
+        }
+
+
 
 /*
         teamReference
@@ -588,43 +584,63 @@ public class DataSource {
      * Reference To Soldier List
      * @param referenceList
      */
-    private void ReferenceToSoldierList(List<DocumentReference> referenceList) {
+    private void ReferenceToSoldierList(final List<DocumentReference> referenceList) {
         if (referenceList.isEmpty()) {
             new Exception("ReferenceToSoldierList: list is empty");
         }
 
         Log.d(LOG_NAME, "ReferenceToSoldierList executed!!!");
+    //    new Thread(new Runnable() {
+    //        @Override
+  //          public void run() {
 
-        for (DocumentReference reference: referenceList) {
-            //Log.d(LOG_NAME, "ReferenceToSoldierList: Current data: " + reference);
-            firebaseFirestore.document(reference.getPath())
-                    .addSnapshotListener(new EventListener<DocumentSnapshot>() {
-                        @Override
-                        public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                            if (error != null) {
-                                Log.w(LOG_NAME, "ReferenceToSoldierList: Listen failed.", error);
-                                return;
-                            }
-                            if (value != null && value.exists()) {
-                                Log.d(LOG_NAME, "ReferenceToSoldierList: soldier data: " + value.getData());
-                                final Map<String, Object> soldierMap = value.getData();
-                                //id name rate comment
-                                final Soldier soldier = new Soldier
-                                        ((String) soldierMap.get("id"), (String) soldierMap.get("name")
-                                                , (long) soldierMap.get("rate"), (String) soldierMap.get("comment"));
 
-                                //TODO: decide to update report for fronend now or later
-                                //reportReferencesToReportObjectsForSoldiers((ArrayList<DocumentReference>) soldierMap.get("reports"), soldier);
-                                //updateSoldierListReport(soldier);//add the report so soldier list in background. TODO: delete. won't work for now
-                                soldierList.add(soldier);
-                                soldiersLiveData.setValue(soldierList);
-                                //Log.d(LOG_NAME, "ReferenceToSoldierList: soldier size: " + soldierList.size());
-                            } else  {
-                                Log.w(LOG_NAME, "ReferenceToSoldierList: soldier data: null");
-                            }
-                        }
-                    });
-        }
+                for (DocumentReference reference: referenceList) {
+                    //Log.d(LOG_NAME, "ReferenceToSoldierList: Current data: " + reference);
+                    firebaseFirestore.document(reference.getPath())
+                            .addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                                @Override
+                                public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                                    if (error != null) {
+                                        Log.w(LOG_NAME, "ReferenceToSoldierList: Listen failed.", error);
+                                        return;
+                                    }
+                                    if (value != null && value.exists()) {
+                                        Log.d(LOG_NAME, "ReferenceToSoldierList: soldier data: " + value.getData());
+                                        final Map<String, Object> soldierMap = value.getData();
+                                        //id name rate comment
+                                        final Soldier soldier = new Soldier
+                                                ((String) soldierMap.get("id"), (String) soldierMap.get("name")
+                                                        , (long) soldierMap.get("rate"), (String) soldierMap.get("comment"));
+                                        Log.i(LOG_NAME, "ReferenceToSoldierList: soldier name " + (String) soldierMap.get("name"));
+                                        //TODO: decide to update report for fronend now or later
+                                        //reportReferencesToReportObjectsForSoldiers((ArrayList<DocumentReference>) soldierMap.get("reports"), soldier);
+                                        //updateSoldierListReport(soldier);//add the report so soldier list in background. TODO: delete. won't work for now
+
+                                        Log.i(LOG_NAME, "ReferenceToSoldierList: soldierList " + soldierList);
+                                        Log.i(LOG_NAME, "ReferenceToSoldierList: soldierList size " + soldierList.size());
+                                        if (!soldierList.contains(soldier)) {
+                                            soldierList.add(soldier);
+                                            soldiersLiveData.setValue(soldierList);
+                                            Log.i(LOG_NAME, "ReferenceToSoldierList: soldier added");
+                                        }
+                                        //Log.d(LOG_NAME, "ReferenceToSoldierList: soldier size: " + soldierList.size());
+                                    } else  {
+                                        Log.w(LOG_NAME, "ReferenceToSoldierList: soldier data: null");
+                                    }
+                                }
+                            });
+                }
+
+
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+   //         }
+  //      }).start();
+
         /*new Thread(new Runnable() {
             @Override
             public void run() {
@@ -764,42 +780,58 @@ public class DataSource {
      * write data to cloud
      */
     public void toCloud() {
-        //addSoldiers();
-        //addUsers();
-        /*for (int i = 0; i < 10; i++){
-            createUsers(i+1);
-        }*/
+        Log.i(LOG_NAME, "toCloud executed");
+        for (int i = 0; i < 10; i++){
+            createUsers(i+1); //users
+        }
 
-        createTeams();
+        ///////////////create teams
+        final ArrayList<String> teamName = new ArrayList<>();
+        //teamName.add("Reshef");
+        //teamName.add("Drakon");
+        //teamName.add("Namer");
+        //teamName.add("Keren");
+        teamName.add("1");
+        teamName.add("2");
+        teamName.add("3");
+        teamName.add("4");
+        teamName.add("5");
+        teamName.add("6");
+        teamName.add("7");
+        teamName.add("8");
+        teamName.add("9");
+        teamName.add("10");
+
+        //createTeams(teamName); //teams
+        for (String name : teamName) {
+            //createCrewForTeam(name); //crew
+        }
+        for (int i=1; i<11;i++) {//add all teams for admin users
+            //addAllTeamsForAdminUser(firebaseFirestore.collection("users").document("admin".concat(String.valueOf(i))));
+        }
+
     }
 
 
 
-    //team for cloud
-    private void createTeams() {
-        /////-/
-        final ArrayList<String> teamName = new ArrayList<>();
-        teamName.add("Reshef");
-        teamName.add("Drakon");
-        teamName.add("Namer");
-        teamName.add("Keren");
-        //////-/
 
+    //team for cloud
+    private void createTeams(final ArrayList<String> teamName) {
         Log.i(LOG_NAME, "createTeams execute");
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 final int[] i = new int[1];
-                for (i[0] = 0; i[0] < 4 ; i[0]++) {
-                    Log.i(LOG_NAME, "loop" + i[0]);
+                for (i[0] = 0; i[0] < teamName.size() ; i[0]++) {
+                    Log.i(LOG_NAME, "createTeams -> teamName.size() " + teamName.size());
+                    Log.i(LOG_NAME, "createTeams -> loop " + i[0]);
                     Map<String, Object> team = new HashMap<>();
-                    team.put("id", String.valueOf(i[0]+100));
+                    team.put("id", String.valueOf(i[0]+1));
                     team.put("name", teamName.get(i[0]));
                     team.put("crew", null);
-
+                    Log.i(LOG_NAME, "createTeams -> team name:" + teamName.get(i[0]));
                     Log.i(LOG_NAME, "1. i[0] is " + i[0] + " for team " + teamName.get(i[0]));
-                    // Add a new document with a generated ID
                     firebaseFirestore.collection("teams")
                             .document(team.get("name").toString())
                             .set(team)
@@ -807,8 +839,7 @@ public class DataSource {
                                 @Override
                                 public void onSuccess(Void Void) {
                                     Log.i(LOG_NAME, "2. i[0] is " + i[0]);
-                                    createCrewForTeam(teamName.get(i[0]));
-                                    Log.i(LOG_NAME, "createTeams -> DocumentSnapshot added");
+                                    Log.i(LOG_NAME, "createTeams -> team created");
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
@@ -835,11 +866,14 @@ public class DataSource {
      * @param teamName
      */
     private void createCrewForTeam(final String teamName) {
-        Thread getCrewThread = new Thread(new Runnable() {
+        Log.i(LOG_NAME, "createCrewForTeam executed");
+        final Thread getCrewThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 crewReferenceList.clear();
-                getCrew();
+                getCrew(teamName);
+
+
 
                 /*
                 important sleep!!! waiting for fetching the crew reference list from soldiers collection
@@ -850,9 +884,9 @@ public class DataSource {
                     e.printStackTrace();
                 }
 
-                Log.i(LOG_NAME, "createCrewForTeam -> crewReferenceList is: " + crewReferenceList);
-                Log.i(LOG_NAME, "createCrewForTeam -> crewReferenceList size: " + crewReferenceList.size());
-                addTheCrew(teamName);
+                //Log.i(LOG_NAME, "createCrewForTeam -> crewReferenceList is: " + crewReferenceList);
+                //Log.i(LOG_NAME, "createCrewForTeam -> crewReferenceList size: " + crewReferenceList.size());
+                //addTheCrew(teamName);
 
 
 
@@ -864,15 +898,58 @@ public class DataSource {
 
     }
 
+    /**
+     * get crew from soldiers collection in cloud
+     * then, call func addTheCrew to add the reference to crew array in teams collection cloud
+     * @param teamID
+     */
+    public void getCrew(final String teamID) {
+        final List<DocumentReference> crewReferenceList = new ArrayList<>();
+        firebaseFirestore.collection("soldiers")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.i(LOG_NAME, "getCrew -> document.getId() ->" + document.getId() + " => " + document.getData());
+                                //int currentID = Integer.parseInt(document.getId());
+                                if (teamID.equals("1")                                                                                  // for team 1
+                                        &&  document.getId().length() == 3
+                                        && document.getId().charAt(0) == teamID.charAt(0)) {
+                                    crewReferenceList.add(document.getReference());
+                                }
+                                else if (teamID.equals("10") && document.getId().length() == 4)                                         //for team 10
+                                {
+                                    crewReferenceList.add(document.getReference());
+                                }
+                                else if (!teamID.equals("1") && !teamID.equals("10") && teamID.charAt(0) == document.getId().charAt(0)) //for teams 2-9
+                                {
+                                    crewReferenceList.add(document.getReference());
+                                }
+                                Log.i(LOG_NAME, "getCrew -> crewReferenceList.size " + crewReferenceList.size());
+                            }
+
+                            addTheCrew(teamID, crewReferenceList);
+                        } else {
+                            Log.i(LOG_NAME, "getCrew: Error getting documents: ", task.getException());
+                            new Exception("error in firestore");
+                        }
+                    }
+                });
+
+    }
+
 
     /**
      * add crew for the team
-     * @param teamName
+     * @param soldierID
+     * @param crewReferenceList
      */
-    private void addTheCrew(String teamName) {
-        Log.i(LOG_NAME, "addTheCrew execute. teamName: " + teamName);
+    private void addTheCrew(String soldierID, List<DocumentReference> crewReferenceList) {
+        Log.i(LOG_NAME, "addTheCrew execute. teamName: " + soldierID);
         firebaseFirestore.collection("teams")
-                .document(teamName)
+                .document(soldierID)
                 .update("crew",crewReferenceList)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -890,61 +967,49 @@ public class DataSource {
                 });
     }
 
-    /**
-     * fetch crew by specific requirements
-     */
-    private void getCrew() {
-        Log.i(LOG_NAME, "getCrew: execute");
-        //////////////////////firestore
-        firebaseFirestore.collection("soldiers")
-                .whereGreaterThanOrEqualTo("id", "15")//the specific requirement
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.i(LOG_NAME, "getCrew -> document.getId() ->" + document.getId() + " => " + document.getData());
-                                crewReferenceList.add(document.getReference());
-                                Log.i(LOG_NAME, "getCrew -> crewReferenceList.size " + crewReferenceList.size());
-                            }
-                        } else {
-                            Log.i(LOG_NAME, "getCrew: Error getting documents: ", task.getException());
-                            new Exception("error in firestore");
-                        }
-                    }
-                });
-        //////////////////////
-    }
+
 
     /**
-     *
+     * create user and add just one team for user
      */
     private void createUsers(final int counter) {
+        Log.i(LOG_NAME, "createUsers executed");
+        ArrayList<DocumentReference> teamsReferences = new ArrayList<>();
         new Thread(new Runnable() {
             @Override
             public void run() {
                 Map<String,Object> users = new HashMap<>();
-                users.put("id", String.valueOf(1001+ counter));
+                users.put("id", "user" + counter);
                 users.put("name","user" + counter);
                 users.put("role","C");
-                getMyTeamReference("35");
-                do {
+
+                //add team to user.TODO: I canceled it for now
+                //getMyTeamReference("1");
+                //do {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    users.put("leaderOfTeam",referencesTemp[0]);
-                    if (referencesTemp[0] != null){
+                    users.put("leaderOfTeam",FieldValue.arrayUnion(referencesTemp[0]));
+                 //   if (referencesTemp[0] != null){
                         addTheUser(users);
-                    }
-                } while (referencesTemp[0] == null);
+                //    }
+                //} while (referencesTemp[0] == null);
+
+
             }
         }).start();
     }
 
+
+
+    /**
+     * assistance method for createUsers method
+     * @param data
+     */
     private void addTheUser(Map<String,Object> data){
+        Log.i(LOG_NAME, "addTheUser -> data: " + data);
         firebaseFirestore.collection("users")
                 .document(data.get("name").toString())
                 .set(data)
@@ -962,6 +1027,8 @@ public class DataSource {
                     }
                 });
     }
+
+
 
     /**
      * get the reference to the team which user would be its leader
@@ -1003,7 +1070,230 @@ public class DataSource {
                 });*/
     }
 
+
+
+    /**
+     * add list of all team references for the admin users who should see all soldiers
+     * @param userReference
+     */
+    private void addAllTeamsForAdminUser(final DocumentReference userReference) {
+        Log.d(LOG_NAME, "addAllTeamsForAdminUser executed!!");
+        final ArrayList<DocumentReference> teamsReferences = new ArrayList<>();
+        firebaseFirestore.collection("teams")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
+                                Log.d(LOG_NAME, "addAllTeamsForAdminUser -> "
+                                        + documentSnapshot.getId() + " => " + documentSnapshot.getData());
+                                teamsReferences.add(documentSnapshot.getReference());
+                            }
+                            Log.d(LOG_NAME, "addAllTeamsForAdminUser -> teamsReferences size is " + teamsReferences.size());
+                            userReference.update("leaderOfTeam", teamsReferences)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(LOG_NAME, "addAllTeamsForAdminUser -> leaderOfTeams updated!!! ");
+                                }
+                            });
+                        }
+                    }
+                });
+    }
+
+
+
+
+    /**
+     * take the soldier list from excel and add soldiers to cloud
+     * @param soldiers
+     */
+    public void createSoldiers(ArrayList<Soldier> soldiers) {
+        Log.i(LOG_NAME, "createSoldiers execute");
+
+        for (Soldier soldier : soldiers) {
+            // Add a new document with a generated ID
+            firebaseFirestore.collection("soldiers")
+                    .document(soldier.getId())
+                    .set(soldier)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void Void) {
+                            Log.i(LOG_NAME, "createSoldiers -> DocumentSnapshot added");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.i(LOG_NAME, "createSoldiers -> Error adding document", e);
+                        }
+                    });
+        }
+    }
+
+    public void deleteSoldier(Soldier soldier, String reason) {
+        DocumentReference fromPath = firebaseFirestore.collection("soldiers").document(soldier.getId());
+        DocumentReference toPath = firebaseFirestore.collection(reason).document(soldier.getId());
+        moveFirestoreDocument(fromPath,toPath);
+    }
+
+    /**
+     * secondary method for delete soldier
+     * @param fromPath
+     * @param toPath
+     */
+    public void moveFirestoreDocument(final DocumentReference fromPath, final DocumentReference toPath) {
+        fromPath.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document != null) {
+                        toPath.set(document.getData())
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Log.d(LOG_NAME, "retire soldier successfully written!");
+                                        fromPath.delete()
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        Log.d(LOG_NAME, "soldier successfully deleted!");
+                                                    }
+                                                })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        Log.w(LOG_NAME, "Error deleting soldier", e);
+                                                    }
+                                                });
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.w(LOG_NAME, "Error writing retire soldier", e);
+                                    }
+                                });
+                    } else {
+                        Log.d(LOG_NAME, "No such document");
+                    }
+                } else {
+                    Log.d(LOG_NAME, "get failed with ", task.getException());
+                }
+            }
+        });
+    }
+
+    private void deleteSoldier1(Soldier soldier) {
+        firebaseFirestore.collection("soldiers").document(soldier.getId())
+                .delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(LOG_NAME, "soldier successfully deleted!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(LOG_NAME, "Error deleting soldier", e);
+                    }
+                });
+    }
+
+    private void updateSoldierComment() {
+
+    }
+
+
+    /**
+     * deprecate version of adding soldiers
+     */
+    private void addSoldiers(){
+        Log.i(LOG_NAME, "addSoldiers execute");
+        /////-/
+        /*ArrayList<String> soldierName = new ArrayList<>();
+        soldierName.add("shar1");
+        soldierName.add("shar13");
+        soldierName.add("shar14");
+        soldierName.add("shar15");
+        soldierName.add("shar16");
+        soldierName.add("shar17");
+        soldierName.add("shar18");
+        soldierName.add("shar19");
+        soldierName.add("shar20");
+        soldierName.add("shar21");
+        soldierName.add("shar22");*/
+        //////-/
+
+        for (int i = 201; i <= 234 ; i++) {
+            Map<String, Object> soldier = new HashMap<>();
+            soldier.put("id", String.valueOf(i));
+            soldier.put("name", String.valueOf(i));
+            soldier.put("rate", 0);
+            soldier.put("comment", "");
+
+            // Add a new document with a generated ID
+            firebaseFirestore.collection("soldiers")
+                    .document(soldier.get("name").toString())
+                    .set(soldier)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void Void) {
+                            Log.i(LOG_NAME, "DocumentSnapshot added");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.i(LOG_NAME, "Error adding document", e);
+                        }
+                    });
+        }
+    }
+
+
+    /**
+     * deprecated
+     * fetch crew by specific requirements
+     */
+    private void getCrew2(final String teamName, final String soldierID) {
+        final List<DocumentReference> crewReferenceList = new ArrayList<>();
+        Log.i(LOG_NAME, "getCrew: execute");
+        Log.i(LOG_NAME, "getCrew -> teamName: " + teamName + ". soldierID: " + soldierID);
+        //////////////////////firestore
+        firebaseFirestore.collection("soldiers")
+                .whereLessThanOrEqualTo("id", soldierID)//the specific requirement
+                .whereGreaterThan("id", soldierID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.i(LOG_NAME, "getCrew -> document.getId() ->" + document.getId() + " => " + document.getData());
+                                crewReferenceList.add(document.getReference());
+                                Log.i(LOG_NAME, "getCrew -> crewReferenceList.size " + crewReferenceList.size());
+                            }
+
+                            addTheCrew(teamName, crewReferenceList);
+                        } else {
+                            Log.i(LOG_NAME, "getCrew: Error getting documents: ", task.getException());
+                            new Exception("error in firestore");
+                        }
+                    }
+                });
+        //////////////////////
+    }
+
+    /**
+     * deprecate
+     */
     private void addUsers() {
+
         /////-/
         ArrayList<String> userName = new ArrayList<>();
         userName.add("user");
@@ -1030,7 +1320,7 @@ public class DataSource {
     private String role;
     private Team leaderOfTeam;
          */
-        Log.i("data source", "addUsers execute");
+        Log.i(LOG_NAME, "addUsers execute");
         final Map<String, Object> user = new HashMap<>();
         user.put("id", 8888);
         user.put("name", userName.get(0));
@@ -1045,93 +1335,35 @@ public class DataSource {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                user.put("leaderOfTeam",document.getReference());
-                                Log.d("data source", "team: " + document.getId() + " => " + document.getData());
+                                user.put("leaderOfTeam",FieldValue.arrayUnion(document.getReference()));
+                                Log.d(LOG_NAME, "team: " + document.getId() + " => " + document.getData());
 
                                 firebaseFirestore.collection("users")
                                         .add(user)
                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                             @Override
                                             public void onSuccess(DocumentReference documentReference) {
-                                                Log.i("data source", "user added. DocumentSnapshot added with ID: " + documentReference.getId());
+                                                Log.i(LOG_NAME, "user added. DocumentSnapshot added with ID: " + documentReference.getId());
                                             }
                                         })
                                         .addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
-                                                Log.i("data source", "Error adding document", e);
+                                                Log.i(LOG_NAME, "Error adding document", e);
                                             }
                                         });
 
                             }
                         } else {
-                            Log.d("data source", "Error getting documents: ", task.getException());
+                            Log.d(LOG_NAME, "Error getting documents: ", task.getException());
                         }
                     }
                 });
     }
 
-    private void addSoldiers(){
-        /////-/
-        ArrayList<String> soldierName = new ArrayList<>();
-        soldierName.add("shar1");
-        soldierName.add("shar13");
-        soldierName.add("shar14");
-        soldierName.add("shar15");
-        soldierName.add("shar16");
-        soldierName.add("shar17");
-        soldierName.add("shar18");
-        soldierName.add("shar19");
-        soldierName.add("shar20");
-        soldierName.add("shar21");
-        soldierName.add("shar22");
-        //////-/
-
-        for (int i = 0; i < 10 ; i++) {
-            Log.i("data source", "addSoldiers execute");
-            Map<String, Object> soldier = new HashMap<>();
-            soldier.put("id", String.valueOf(i+10));
-            soldier.put("name", soldierName.get(i));
-            soldier.put("rate", 70 + i);
-            soldier.put("comment", "good");
-
-            // Add a new document with a generated ID
-            firebaseFirestore.collection("soldiers")
-                    .document(soldier.get("name").toString())
-                    .set(soldier)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void Void) {
-                            Log.i("data source", "DocumentSnapshot added");
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.i("data source", "Error adding document", e);
-                        }
-                    });
-        }
-    }
-
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-    ////////////////////
-
-
-
-
-
-
-
 
 
 
