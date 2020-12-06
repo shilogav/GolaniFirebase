@@ -352,6 +352,7 @@ public class DataSource {
      * @param userName
      */
     private void getUser(final String userName) {
+        Log.i(LOG_NAME, "getUser execute!!");
         DocumentReference userReference = firebaseFirestore.collection(USERS_COLLECTION)
                 .document(userName);
 
@@ -374,11 +375,16 @@ public class DataSource {
 
                     //add the team to frontend
                     Object object = value.getData().get("leaderOfTeam");
+                    if (((ArrayList<DocumentReference>) object).get(0) == null) {
+                        getUser(userName);
+                        return;
+                    }
                     ArrayList <DocumentReference> listTemp = new ArrayList<>();
                     if (object instanceof DocumentReference) {
                         listTemp.add((DocumentReference) object);
                         getTeamFromUser(listTemp);
                     } else if (object instanceof ArrayList){
+
                         getTeamFromUser((ArrayList<DocumentReference>) value.getData().get("leaderOfTeam"));
                     }
 
@@ -494,6 +500,7 @@ public class DataSource {
      * @param list
      */
     private void getTeamFromUser(ArrayList<DocumentReference> list) {
+        Log.i(LOG_NAME, "getTeamFromUser execute");
         final List<DocumentReference> crewReferenceList = new ArrayList<>();
         if (list == null) {
             new Exception("getTeamFromUser: team list is null");
@@ -501,6 +508,9 @@ public class DataSource {
         }
 
         for (DocumentReference reference : list) {
+            if (reference == null) {
+                new Exception("no team added for user");
+            }
             DocumentReference teamReference = firebaseFirestore.document(reference.getPath());
 
             teamReference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
@@ -1133,10 +1143,40 @@ public class DataSource {
         }
     }
 
-    public void deleteSoldier(Soldier soldier, String reason) {
-        DocumentReference fromPath = firebaseFirestore.collection("soldiers").document(soldier.getId());
+    public void deleteSoldier(final Soldier soldier, String reason) {
+        final DocumentReference fromPath = firebaseFirestore.collection(SOLDIERS_COLLECTION).document(soldier.getId());
         DocumentReference toPath = firebaseFirestore.collection(reason).document(soldier.getId());
         moveFirestoreDocument(fromPath,toPath);
+        //delete soldier from team
+        firebaseFirestore.collection(TEAMS_COLLECTION)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(LOG_NAME, document.getId() + " => " + document.getData());
+                                //Map<String,Object> updates = new HashMap<>();
+                                //updates.put("crew", FieldValue.delete());
+                                document.getReference().update("crew", FieldValue.arrayRemove(fromPath))
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                Log.d(LOG_NAME, "update execute");
+                                                if (task.isSuccessful()) {
+                                                    Log.d(LOG_NAME, "crew soldier successfully deleted!");
+                                                } else {
+                                                    Log.d(LOG_NAME, "Error deleting crew soldier ", task.getException());
+                                                }
+                                            }
+                                        });
+                            }
+                        } else {
+                            Log.d(LOG_NAME, "Error getting teams: ", task.getException());
+                        }
+                    }
+                });
+
     }
 
     /**

@@ -51,6 +51,9 @@
     <string name="interview_sixth">רמה אישית</string>
     <string name="interview_seventh">עד כמה מתאים החייל לשרת ביחידה</string>
 
+    <string name="menu_report_excel">ייצא לאקסל</string>
+    <string name="sign_out">יציאת משתמש</string>
+
 
     <string name="menu_home">רשימת חיילים</string>
     <string name="menu_gallery">Gallery</string>

@@ -95,7 +95,12 @@ public class Repository {
         dataSource.setReport(report, soldier, userLiveData.getValue());
     }
 
-    public void deleteSoldier(Soldier soldier, String reason){
-        dataSource.deleteSoldier(soldier,reason);
+    public void deleteSoldier(final Soldier soldier, final String reason){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                dataSource.deleteSoldier(soldier,reason);
+            }
+        }).start();
     }
 }

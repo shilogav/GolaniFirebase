@@ -1,5 +1,7 @@
 package com.shilo.golanimanage.mainactivity.adapters;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +18,11 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> implements Serializable {
+public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
     private List<Soldier> soliders = new ArrayList<>();
     private RecyclerViewClickListener listener;
+
+
 
     @NonNull
     @Override
@@ -54,7 +58,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         return soliders.get(position);
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
         SoldiersRecyclerViewRawBinding rawBinding;
 
         public ViewHolder(@NonNull SoldiersRecyclerViewRawBinding rawBinding) {
@@ -71,8 +75,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                 }
                 });
         }
-
-
 
     }
 

@@ -27,7 +27,7 @@
             android:layout_gravity="center"
             android:numStars="10"
             android:rating="@{question.rate}"
-            android:isIndicator="false"
+            android:isIndicator="@{!question.mutable}"
             style="@style/Widget.AppCompat.RatingBar.Small"
             />
     </LinearLayout>

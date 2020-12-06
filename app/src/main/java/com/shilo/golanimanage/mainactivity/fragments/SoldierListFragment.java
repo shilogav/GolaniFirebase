@@ -1,9 +1,9 @@
 package com.shilo.golanimanage.mainactivity.fragments;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -12,28 +12,29 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.shilo.golanimanage.R;
 import com.shilo.golanimanage.Utility;
 import com.shilo.golanimanage.databinding.FragmentSoldierListBinding;
+import com.shilo.golanimanage.login.LoginActivity;
+import com.shilo.golanimanage.mainactivity.MainActivityV3;
 import com.shilo.golanimanage.mainactivity.adapters.RecyclerAdapter;
 import com.shilo.golanimanage.mainactivity.model.Soldier;
 import com.shilo.golanimanage.model.LoggedInUser;
-
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -92,9 +93,7 @@ public class SoldierListFragment extends Fragment implements Serializable {
         //data binding
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_soldier_list, container, false);
         View view = binding.getRoot();
-        if (savedInstanceState != null) {
-            return view;
-        }
+
 
         //progress bar
         progressBarManage();
@@ -118,11 +117,16 @@ public class SoldierListFragment extends Fragment implements Serializable {
 
         manageBackKey(view);
 
+        //fab button
+        manageFab();
+
+        //action bar
+        //setHasOptionsMenu(true);
 
         //viewModel.init();
 
         //initialize
-        initRecyclerView(savedInstanceState);
+        initRecyclerView();
 
         /*
          * write data to cloud
@@ -140,9 +144,7 @@ public class SoldierListFragment extends Fragment implements Serializable {
         viewModel.getSoldiersLiveData().observe(getViewLifecycleOwner(), new Observer<List<Soldier>>() {
             @Override
             public void onChanged(List<Soldier> soldiers) {
-                if (savedInstanceState != null) {
-                    return;
-                }
+
                 adapter.setSoldiers(soldiers);
                 Log.i("SoldierListFragment", "viewModel.getSoldiersLiveData().observe(getViewLifecycleOwner()..........");
                 Log.i("SoldierListFragment", "adapter num of soldiers: " + adapter.getItemCount());
@@ -150,6 +152,23 @@ public class SoldierListFragment extends Fragment implements Serializable {
         });
 
         return view;
+    }
+
+    private void manageFab() {
+        binding.logoutFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getActivity(),
+                        "sign out", Toast.LENGTH_SHORT).show();
+                SharedPreferences prefs = getContext().getSharedPreferences("UserData", MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.clear();
+                editor.apply();
+                Intent intent = new Intent(getContext(), LoginActivity.class);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        });
     }
 
     private void manageBackKey(View view) {
@@ -180,7 +199,7 @@ public class SoldierListFragment extends Fragment implements Serializable {
                 binding.layoutProgressBar.setVisibility(View.VISIBLE);
                 binding.recyclerViewSoldiers.setVisibility(View.INVISIBLE);
                 try {
-                    Thread.sleep(4000);
+                    Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -200,37 +219,9 @@ public class SoldierListFragment extends Fragment implements Serializable {
     /**
      * Recycler view initialize
      */
-    private void initRecyclerView(Bundle savedInstanceState){
+    private void initRecyclerView(){
         adapter = new RecyclerAdapter();
-        /*
-        dummy example
-        Soldier soldier = new Soldier("shalom");
-        Soldier soldier2 = new Soldier("eli");
-        Soldier soldier3 = new Soldier("ronen");
-        Soldier soldier4 = new Soldier("yochay");
-        Soldier soldier5 = new Soldier("yosi");
-        Soldier soldier6 = new Soldier("shalev");
-        Soldier soldier7 = new Soldier("shilo");
-        Soldier soldier8 = new Soldier("aviad");
-        Soldier soldier9 = new Soldier("nathan");
-        Soldier soldier10 = new Soldier("asaf");
-        Soldier soldier11 = new Soldier("nisi");
-        Soldier soldier12 = new Soldier("david");
-        /////////////////////
-        ArrayList<Soldier> soldiersExample = new ArrayList<>();
-        soldiersExample.add(soldier);
-        soldiersExample.add(soldier2);
-        soldiersExample.add(soldier3);
-        soldiersExample.add(soldier4);
-        soldiersExample.add(soldier5);
-        soldiersExample.add(soldier6);
-        soldiersExample.add(soldier7);
-        soldiersExample.add(soldier8);
-        soldiersExample.add(soldier9);
-        soldiersExample.add(soldier10);
-        soldiersExample.add(soldier11);
-        soldiersExample.add(soldier12);
-        adapter.setSoldiers(soldiersExample);*/
+
 
         adapter.setOnRVClickListener(new RecyclerAdapter.RecyclerViewClickListener() {
             @Override
@@ -245,7 +236,7 @@ public class SoldierListFragment extends Fragment implements Serializable {
 
         binding.recyclerViewSoldiers.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerViewSoldiers.setHasFixedSize(true);
-        Log.i("SoldierListFragment: savedInstanceState is null? ", String.valueOf(savedInstanceState == null));
+        //Log.i("SoldierListFragment: savedInstanceState is null? ", String.valueOf(savedInstanceState == null));
         //if (savedInstanceState != null) {
         //    Log.i("SoldierListFragment: ","savedInstanceState is null");
         //    binding.recyclerViewSoldiers.setAdapter((RecyclerAdapter)savedInstanceState.getSerializable("adapter"));
@@ -276,8 +267,23 @@ public class SoldierListFragment extends Fragment implements Serializable {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putSerializable("adapter", adapter);
+        //outState.putSerializable("adapter", adapter);
         //adapter.getSoliders().clear();
         super.onSaveInstanceState(outState);
     }
+
+    /*@Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.soldier_list_menu, menu);
+        return;
+    }*/
+
+    /*@Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.soldier_list_sign_out) {
+            Toast.makeText(getActivity(),
+                    "soldier list sign out", Toast.LENGTH_SHORT).show();
+        }
+        return super.onOptionsItemSelected(item);
+    }*/
 }

@@ -16,6 +16,9 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -32,6 +35,7 @@ import com.shilo.golanimanage.model.LoggedInUser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.apache.poi.ss.usermodel.DataFormatter;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -94,6 +98,9 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
             Log.i("ReportFragment. the argumend id:"
                     , ((Soldier)fragment.getArguments().getSerializable("soldier")).getId());
         }
+
+        //action bar
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -111,6 +118,7 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
         //view model
         viewModel = new ViewModelProvider(this).get(ReportViewModel.class);
         viewModel.setSoldier(soldier);
+
         //recycler view
         initRecyclerView();
         //set title
@@ -173,47 +181,15 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
         Log.i("ReportFragment -> initRecyclerView", "report from user: " + user.getReports());
         Log.i("ReportFragment -> initRecyclerView", "report from soldier: " + soldier.getReports());
         //////////////////////////////////////
-        //sort report for specific soldier and specific user
-        /*List<Report> tempList = new ArrayList<>();//list of reports for specific soldier and specific user
-        tempList.addAll(user.getReports());
-        tempList.retainAll(soldier.getReports());
-        boolean reportExist = false;
-        for (Report report : tempList) {
-            if (report.getDescription().equals(reportType)) {
-                reportExist = true;
-                break;
-            }
-        }*/
-        //reportMutableLiveData = viewModel.getReport(soldier, reportType);
 
-
-
-        //if (tempList.isEmpty() || !reportExist) {//search report in soldier and user reports
-        /*if (report == null) {
-            report = new Report();
-            report.setDescription(reportType);
-            report.setQuestionList(fillReport());
-            report.setIdSoldier(soldier.getId());
-            report.setIdLeader(user.getUserId());
-        } else {//TODO:test fetch existing report
-            for (Report temp : tempList) {
-                if (temp.getDescription().equals(reportType)) {
-                    report = temp;
-                    break;
-                }
-            }
-            //if report already in cloud then lock for editing
-            binding.saveFab.hide();
-        }*/
 
         binding.questionList.setItemViewCacheSize(10);
         binding.questionList.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.questionList.setHasFixedSize(true);
         binding.questionList.setAdapter(adapter);
-        //adapter.setQuestions(report.getQuestionList() );
         report = new Report();
         report.setQuestionList(fillReport());
-        adapter.setQuestions(report.getQuestionList());
+        //adapter.setQuestions(report.getQuestionList());
         viewModel.getReport(soldier, reportType).observe(getViewLifecycleOwner(), new Observer<Report>() {
             @Override
             public void onChanged(Report report) {
@@ -222,16 +198,32 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
                     fragment.report = new Report();
                     fragment.report.setQuestionList(fillReport());
                     adapter.setQuestions(fragment.report.getQuestionList());
+
+                    if (user.getName().contains("Admin") || user.getName().contains("admin")) {
+                        for (Question question : adapter.getQuestions()) {
+                            question.setMutable(false);
+                        }
+                    }
+
                     isNewReport = true;
                     Log.i("ReportFragment", "new report");
                     return;
+                } else {
+                    adapter.setQuestions(report.getQuestionList() );
+                    isNewReport = false;
+                    if (user.getName().contains("Admin") || user.getName().contains("admin")) { //if report already filled, not admin user can't change rate
+                        for (Question question : adapter.getQuestions()) {
+                            question.setMutable(true);
+                        }
+                    }
+
                 }
-                adapter.setQuestions(report.getQuestionList() );
-                isNewReport = false;
+                fragment.report = report;
                 Log.i("ReportFragment", "onChanged -> setQuestions " + report);
 
             }
         });
+
 
     }
 
@@ -251,11 +243,14 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        if (isNewReport) {
-                            if (!user.getName().contains("admin") && !user.getName().contains("Admin")) {
+                        if (isNewReport) { //if new report for user, can be saved for cloud
+                            if (user.getName().contains("user")) {
                                 binding.saveFab.show();
                             }
-                        } else {
+                        } else if (user.getName().contains("Admin") || user.getName().contains("admin"))
+                        { //if exist report for admin, can be saved for cloud
+                            binding.saveFab.show();
+                        } else { //if exist report for user, can't be saved for cloud
                             binding.saveFab.hide();
                         }
                     }
@@ -268,7 +263,6 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
             @Override
             public void onClick(View v) {
                 Log.i("ReportFragment -> fab.setOnClickListener", "button clicked");
-                Toast.makeText(getContext(), "send to cloud", Toast.LENGTH_SHORT).show();
 
                 dialogFragment = new SaveDialog(fragment);
                 //getActivity().getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -282,14 +276,21 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
     @Override
     public void onPositiveClick(DialogFragment dialog) {
         //fill report details and send to cloud
-        report.setId("report:" + UUID.randomUUID());
-        report.setDescription(reportType);
-        report.setQuestionList(adapter.getQuestions());
-        report.setIdLeader(user.getUserId());
-        report.setIdSoldier(soldier.getId());
+        if (isNewReport) {
+            report.setId("report:" + UUID.randomUUID());
+            report.setDescription(reportType);
+            report.setQuestionList(adapter.getQuestions());
+            report.setIdLeader(user.getUserId());
+            report.setIdSoldier(soldier.getId());
+        } else { //if admin edit, change only rate details
+            report.setQuestionList(adapter.getQuestions());
+        }
+
         viewModel.setReport(report);
         dialog.dismiss();
         binding.saveFab.hide();
+
+        Toast.makeText(getContext(), "שומר, אנא המתן..", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -342,5 +343,27 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
          }
 
         return questions;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.report_menu, menu);
+        return;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.export_excel) {
+            Toast.makeText(getActivity(),
+                    "export excel", Toast.LENGTH_SHORT).show();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Utility.saveExcelFile(getContext(),soldier.getName() + "-" + reportType + " report.xlsx",adapter.getQuestions());
+                }
+            }).start();
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

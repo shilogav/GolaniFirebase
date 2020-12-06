@@ -86,7 +86,7 @@ public class LoggedInUser {
 
     @Override
     public String toString() {
-        return "userId is" + userId + '\'' +
+        return "userId is " + userId + '\'' +
                 ", displayName is " + name + '\'' +
                 ", role is " + role;
     }

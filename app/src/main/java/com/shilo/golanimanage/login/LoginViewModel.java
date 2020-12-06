@@ -116,12 +116,40 @@ public class LoginViewModel extends ViewModel {
             {
                 put("user1",5);
                 put("Admin",555555);
-                put("Shalom",801553);
-                put("Shaul", 6584818);
-                put("Ron", 5465844);
-                put("Yair",976435);
-                put("David", 354897);
-                put("Efraim", 286475);
+                put("admin1",561684);
+                put("admin2",979791);
+                put("admin3",138848);
+                put("admin4",684651);
+                put("admin5",285648);
+                put("admin6",461568);
+                put("admin7",256668);
+                put("admin8",368124);
+                put("admin9",258787);
+                put("admin10",786123);
+                put("user2",801553);
+                put("user3", 6584818);
+                put("user4", 5465844);
+                put("user5",976435);
+                put("user6", 354897);
+                put("user7", 286475);
+                put("user8", 286331);
+                put("user9", 266465);
+                put("user10", 354897);
+                put("user11", 885473);
+                put("user12", 436485);
+                put("user13", 178615);
+                put("user14", 354897);
+                put("user15", 286475);
+                put("user16", 325124);
+                put("user17", 205868);
+                put("user18", 795416);
+                put("user19", 846887);
+                put("user20", 423061);
+                put("user21", 389734);
+                put("user22", 897725);
+                put("user23", 425897);
+                put("user24", 746545);
+                put("user25", 267836);
             }
         };
     }
