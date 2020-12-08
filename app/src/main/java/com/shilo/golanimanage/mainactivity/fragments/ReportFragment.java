@@ -1,8 +1,21 @@
 package com.shilo.golanimanage.mainactivity.fragments;
 
+import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -26,17 +39,20 @@ import android.widget.Toast;
 import com.shilo.golanimanage.R;
 import com.shilo.golanimanage.Utility;
 import com.shilo.golanimanage.databinding.FragmentPlainQuestionListBinding;
+import com.shilo.golanimanage.mainactivity.MainActivityV3;
 import com.shilo.golanimanage.mainactivity.dialog.SaveDialog;
 import com.shilo.golanimanage.mainactivity.model.Question;
 import com.shilo.golanimanage.mainactivity.model.Report;
 import com.shilo.golanimanage.mainactivity.model.Soldier;
 import com.shilo.golanimanage.model.LoggedInUser;
+import com.shilo.golanimanage.notification.NotificationView;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.apache.poi.ss.usermodel.DataFormatter;
 
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.Context.MODE_PRIVATE;
 
 /**
@@ -61,6 +77,7 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
     public static final String PLAIN = "plain";
     public static final String INTERVIEW = "interview";
     public static final String REPORT_TYPE = "reportType";
+    private static final int PERMISSION_REQUEST_CODE = 200;
     String reportType;
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -306,41 +323,41 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
      *///TODO: to accurate the report object and add here the data
     private List<Question> fillReport() {
         ArrayList<Question> questions = new ArrayList<>();
-         if (reportType.equals(PLAIN)) {
-             Question question1 = new Question(getString(R.string.plain_second), 0);
-             Question question2 = new Question(getString(R.string.plain_third), 0);
-             Question question3 = new Question(getString(R.string.plain_fourth), 0);
-             Question question4 = new Question(getString(R.string.plain_fifth), 0);
-             Question question5 = new Question(getString(R.string.plain_sixth), 0);
-             Question question6 = new Question(getString(R.string.plain_seventh), 0);
-             Question question7 = new Question(getString(R.string.plain_eighth), 0);
-             Question question8 = new Question(getString(R.string.plain_ninth), 0);
-             Question question9 = new Question(getString(R.string.plain_tenth), 0);
+        if (reportType.equals(PLAIN)) {
+            Question question1 = new Question(getString(R.string.plain_second), 0);
+            Question question2 = new Question(getString(R.string.plain_third), 0);
+            Question question3 = new Question(getString(R.string.plain_fourth), 0);
+            Question question4 = new Question(getString(R.string.plain_fifth), 0);
+            Question question5 = new Question(getString(R.string.plain_sixth), 0);
+            Question question6 = new Question(getString(R.string.plain_seventh), 0);
+            Question question7 = new Question(getString(R.string.plain_eighth), 0);
+            Question question8 = new Question(getString(R.string.plain_ninth), 0);
+            Question question9 = new Question(getString(R.string.plain_tenth), 0);
 
-             questions.add(question1);
-             questions.add(question2);
-             questions.add(question3);
-             questions.add(question4);
-             questions.add(question5);
-             questions.add(question6);
-             questions.add(question7);
-             questions.add(question8);
-             questions.add(question9);
+            questions.add(question1);
+            questions.add(question2);
+            questions.add(question3);
+            questions.add(question4);
+            questions.add(question5);
+            questions.add(question6);
+            questions.add(question7);
+            questions.add(question8);
+            questions.add(question9);
         } else {
-             Question question1 = new Question(getString(R.string.interview_second), 0);
-             Question question2 = new Question(getString(R.string.interview_third), 0);
-             Question question3 = new Question(getString(R.string.interview_fourth), 0);
-             Question question4 = new Question(getString(R.string.interview_fifth), 0);
-             Question question5 = new Question(getString(R.string.interview_sixth), 0);
-             Question question6 = new Question(getString(R.string.interview_seventh), 0);
+            Question question1 = new Question(getString(R.string.interview_second), 0);
+            Question question2 = new Question(getString(R.string.interview_third), 0);
+            Question question3 = new Question(getString(R.string.interview_fourth), 0);
+            Question question4 = new Question(getString(R.string.interview_fifth), 0);
+            Question question5 = new Question(getString(R.string.interview_sixth), 0);
+            Question question6 = new Question(getString(R.string.interview_seventh), 0);
 
-             questions.add(question1);
-             questions.add(question2);
-             questions.add(question3);
-             questions.add(question4);
-             questions.add(question5);
-             questions.add(question6);
-         }
+            questions.add(question1);
+            questions.add(question2);
+            questions.add(question3);
+            questions.add(question4);
+            questions.add(question5);
+            questions.add(question6);
+        }
 
         return questions;
     }
@@ -354,16 +371,98 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.export_excel) {
-            Toast.makeText(getActivity(),
-                    "export excel", Toast.LENGTH_SHORT).show();
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Utility.saveExcelFile(getContext(),soldier.getName() + "-" + reportType + " report.xlsx",adapter.getQuestions());
-                }
-            }).start();
+
+            if (ContextCompat.checkSelfPermission(
+                    getContext(), WRITE_EXTERNAL_STORAGE) ==
+                    PackageManager.PERMISSION_GRANTED) {
+                // You can use the API that requires the permission.
+                Toast.makeText(getContext(), "PERMISSION GRANTED", Toast.LENGTH_SHORT).show();
+                addNotification();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        Utility.saveExcelFile(getContext(),soldier.getName() + "-" + reportType + " report.xlsx",adapter.getQuestions());
+                    }
+                }).start();
+            } else if (shouldShowRequestPermissionRationale(WRITE_EXTERNAL_STORAGE)) {
+                // In an educational UI, explain to the user why your app requires this
+                // permission for a specific feature to behave as expected. In this UI,
+                // include a "cancel" or "no thanks" button that allows the user to
+                // continue using your app without granting the permission.
+                Toast.makeText(getContext(), "PERMISSION ask", Toast.LENGTH_SHORT).show();
+                requestPermissions(new String[]{WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+            } else {
+                Toast.makeText(getContext(), "PERMISSION GRANTED", Toast.LENGTH_SHORT).show();
+
+            }
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE:
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission is granted. Continue the action or workflow
+                    // in your app.
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utility.saveExcelFile(getContext(),soldier.getName() + "-" + reportType + " report.xlsx",adapter.getQuestions());
+                            addNotification();
+                        }
+                    }).start();
+                }  else {
+                    Toast.makeText(getContext(), getString(R.string.permission_denied), Toast.LENGTH_LONG).show();
+                    // Explain to the user that the feature is unavailable because
+                    // the features requires a permission that the user has denied.
+                    // At the same time, respect the user's decision. Don't link to
+                    // system settings in an effort to convince the user to change
+                    // their decision.
+                }
+                return;
+        }
+
+    }
+
+
+
+    private void addNotification() {
+        String channelId = "Your_channel_id";
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(getContext(), channelId);
+        builder.setSmallIcon(R.drawable.ic_soldiers);
+        builder.setContentTitle(getString(R.string.notification_title));
+        builder.setContentText(getString(R.string.notification_message));
+
+        Intent notificationIntent = new Intent();
+        PendingIntent contentIntent = PendingIntent.getActivity(getContext(), 0, notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(contentIntent);
+
+
+        NotificationManager manager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // === Removed some obsoletes
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+
+            NotificationChannel channel = new NotificationChannel(
+                    channelId,
+                    "Channel human readable title",
+                    NotificationManager.IMPORTANCE_HIGH);
+            manager.createNotificationChannel(channel);
+            builder.setChannelId(channelId);
+        }
+
+
+        // Add as notification
+
+        manager.notify(0, builder.build());
     }
 }

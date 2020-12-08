@@ -5,12 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.view.View;
 
 import com.shilo.golanimanage.R;
 import com.shilo.golanimanage.mainactivity.fragments.SoldierListFragment;
@@ -26,7 +24,6 @@ public class MainActivityV3 extends AppCompatActivity {
         setContentView(R.layout.activity_main_v3);
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.app_layout_label);
-
         loadFragment(new SoldierListFragment());
     }
 

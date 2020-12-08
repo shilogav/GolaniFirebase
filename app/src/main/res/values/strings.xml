@@ -31,7 +31,7 @@
     <string name="report_save_message">בטוח שאתה רוצה לשמור?\n הדו"ח יהיה נעול לעריכה</string>
     <string name="report_save_positive">כן</string>
     <string name="report_save_negative">לא</string>
-    
+
 
     <string name="plain_second">עבודה בתנאי לחץ</string>
     <string name="plain_third">השקעה והתמדה</string>
@@ -52,6 +52,9 @@
     <string name="interview_seventh">עד כמה מתאים החייל לשרת ביחידה</string>
 
     <string name="menu_report_excel">ייצא לאקסל</string>
+    <string name="permission_denied">לא יכול לייצר מסמך, אין הרשאה לכתוב בזיכרון</string>
+    <string name="notification_title">דוח החייל נוצר</string>
+    <string name="notification_message">הקובץ נמצא בתיקיית הורדות</string>
     <string name="sign_out">יציאת משתמש</string>
 
 
@@ -60,4 +63,10 @@
     <string name="menu_slideshow">Slideshow</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_notification_view">NotificationView</string>
+    <!--
+    This string is used for square devices and overridden by hello_world in
+    values-round/strings.xml for round devices.
+    -->
+    <string name="hello_world">Hello Square World!</string>
 </resources>

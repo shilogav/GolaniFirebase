@@ -11,12 +11,23 @@
         android:roundIcon="@mipmap/ic_launcher_firebase_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".mainactivity.MainActivityV3"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".mainactivity.MainActivity1"
+
+
+        <activity
+            android:name=".notification.NotificationView"
+            android:parentActivityName=".mainactivity.MainActivityV3"
+            android:label="@string/title_activity_notification_view">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".mainactivity.MainActivityV3"/>
+        </activity>
+        <activity
+            android:name=".mainactivity.MainActivityV3"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".login.LoginActivity">
+            android:name=".mainactivity.MainActivity1"
+            android:screenOrientation="portrait" />
+        <activity android:name=".login.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,9 +40,5 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.ActionBar" />
     </application>
-
-
-
-
 
 </manifest>
