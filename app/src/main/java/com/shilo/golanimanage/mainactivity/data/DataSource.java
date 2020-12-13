@@ -779,7 +779,7 @@ public class DataSource {
         }).start();
     }
 
-    public MutableLiveData<String> getComment2(Soldier soldier) {
+    public MutableLiveData<String> getComment(Soldier soldier) {
         final DocumentReference soldierRef = firebaseFirestore.collection(SOLDIERS_COLLECTION).document(soldier.getId());
         firebaseFirestore.runTransaction(new Transaction.Function<Object>() {
             @Nullable
@@ -818,7 +818,7 @@ public class DataSource {
         return commentLiveData;
     }
 
-    public MutableLiveData<String> getComment(Soldier soldier) {
+    public MutableLiveData<String> getComment2(Soldier soldier) {
         final DocumentReference soldierRef = firebaseFirestore.collection(SOLDIERS_COLLECTION).document(soldier.getId());
         soldierRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
@@ -850,7 +850,7 @@ public class DataSource {
      */
     public void toCloud() {
         Log.i(LOG_NAME, "toCloud executed");
-        for (int i = 0; i < 10; i++){
+        for (int i = 0; i < 37; i++){
             createUsers(i+1); //users
         }
 

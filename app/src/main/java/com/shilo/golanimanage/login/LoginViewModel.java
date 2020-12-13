@@ -114,7 +114,6 @@ public class LoginViewModel extends ViewModel {
     private HashMap <String,Integer> setUserAndPasswordMap() {
         return new HashMap<String, Integer>() {
             {
-                put("user1",5);
                 put("Admin",555555);
                 put("admin1",561684);
                 put("admin2",979791);
@@ -126,6 +125,8 @@ public class LoginViewModel extends ViewModel {
                 put("admin8",368124);
                 put("admin9",258787);
                 put("admin10",786123);
+
+                put("user1",5284759);
                 put("user2",801553);
                 put("user3", 6584818);
                 put("user4", 5465844);
@@ -150,6 +151,20 @@ public class LoginViewModel extends ViewModel {
                 put("user23", 425897);
                 put("user24", 746545);
                 put("user25", 267836);
+                put("user26", 3546756);
+                put("user27", 547443);
+                put("user28", 954788);
+                put("user29", 457844);
+                put("user30", 112775);
+                put("user31", 905200);
+                put("user32", 857320);
+                put("user33", 444613);
+                put("user34", 987065);
+                put("user35", 568753);
+                put("user36", 663546);
+
+
+                put("user37", 5);
             }
         };
     }

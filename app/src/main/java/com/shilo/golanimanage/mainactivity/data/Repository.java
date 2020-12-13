@@ -59,7 +59,7 @@ public class Repository {
     }
 
     public void toCloud() {
-        dataSource.toCloud();
+        //dataSource.toCloud();
     }
 
     public void createSoldiers(ArrayList<Soldier> soldiers) {

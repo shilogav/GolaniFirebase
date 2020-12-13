@@ -40,7 +40,7 @@ public class SoldierListViewModel extends ViewModel {
     public SoldierListViewModel() {
         this.repository = Repository.getInstance();
         commentLiveData = getCommentLiveData();
-        //toCloud();
+        toCloud();
     }
 
     public static MutableLiveData<String> getCommentLiveData() {
@@ -133,7 +133,7 @@ public class SoldierListViewModel extends ViewModel {
 
     public void toCloud(){
         //TODO: write data to cloud
-        //repository.toCloud();
+        repository.toCloud();
     }
 
     public void deleteSoldier(Soldier soldier, String reason) {
