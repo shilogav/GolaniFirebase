@@ -1,4 +1,4 @@
-package com.shilo.golanimanage.mainactivity.fragments;
+package com.shilo.golanimanage.mainactivity.viewmodel;
 
 import android.app.Activity;
 import android.content.res.AssetManager;
@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 /**
@@ -32,10 +34,20 @@ import androidx.lifecycle.ViewModel;
 public class SoldierListViewModel extends ViewModel {
     private Repository repository;
     private Activity activity;
+    private static MutableLiveData<String> commentLiveData;
+    //public final LiveData<String> transformationComment = Transformations.map(commentLiveData, (re))
 
     public SoldierListViewModel() {
         this.repository = Repository.getInstance();
+        commentLiveData = getCommentLiveData();
         //toCloud();
+    }
+
+    public static MutableLiveData<String> getCommentLiveData() {
+        if (commentLiveData == null) {
+            commentLiveData = new MutableLiveData<>();
+        }
+        return commentLiveData;
     }
 
     public void setActivity(Activity activity) {
@@ -126,5 +138,9 @@ public class SoldierListViewModel extends ViewModel {
 
     public void deleteSoldier(Soldier soldier, String reason) {
         repository.deleteSoldier(soldier,reason);
+    }
+
+    public MutableLiveData<String> getComment(Soldier soldier) {
+        return repository.getComment(soldier);
     }
 }

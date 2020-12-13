@@ -1,5 +1,6 @@
 package com.shilo.golanimanage.mainactivity.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -8,19 +9,25 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.shilo.golanimanage.R;
 import com.shilo.golanimanage.databinding.FragmentSoldierDetailsBinding;
 import com.shilo.golanimanage.mainactivity.dialog.RetirementDialog;
 import com.shilo.golanimanage.mainactivity.model.Soldier;
+import com.shilo.golanimanage.mainactivity.viewmodel.SoldierListViewModel;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -29,12 +36,15 @@ import com.shilo.golanimanage.mainactivity.model.Soldier;
  */
 public class SoldierDetailsFragment extends Fragment implements RetirementDialog.DialogListener {
 
+    private Fragment fragment = this;
     private SoldierListViewModel viewModel;//also using SoldierListViewModel
     private FragmentSoldierDetailsBinding binding;
     public static final String PLAIN = "plain";
     public static final String INTERVIEW = "interview";
     public static final String REPORT_TYPE = "reportType";
+
     private Soldier soldier;
+    private String tempString;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -47,7 +57,10 @@ public class SoldierDetailsFragment extends Fragment implements RetirementDialog
 
     public SoldierDetailsFragment() {
         // Required empty public constructor
+
     }
+
+
 
     /**
      * Use this factory method to create a new instance of
@@ -89,6 +102,34 @@ public class SoldierDetailsFragment extends Fragment implements RetirementDialog
         soldier =(Soldier) getArguments().getSerializable("soldier");
         //update the data binder for soldiers details
         binding.setSoldier(soldier);
+
+        viewModel.getComment(soldier).observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String comment) {
+                // (comment == null) {
+                //    return;
+                //}
+
+            }
+        });
+
+        binding.commentContent.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                binding.saveFabComments.show();
+                //soldier.setComment(s.toString());
+            }
+        });
+
+        manageFab();
 
         ///////////////////////////
         //click listeners
@@ -136,7 +177,6 @@ public class SoldierDetailsFragment extends Fragment implements RetirementDialog
         return view;
     }
 
-    Fragment fragment = this;
     private void manageBackKey(View view) {
         //view.setFocusableInTouchMode(true);
         //view.requestFocus();
@@ -193,5 +233,19 @@ public class SoldierDetailsFragment extends Fragment implements RetirementDialog
         Toast.makeText(getContext(), "initiated",Toast.LENGTH_SHORT).show();
         dialog.dismiss();
         getParentFragmentManager().popBackStack();
+    }
+
+    private void manageFab() {
+
+        binding.saveFabComments.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                InputMethodManager inputManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(fragment.getView().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                SoldierListViewModel.getCommentLiveData().setValue(soldier.getComment());
+                viewModel.getComment(soldier);
+                Log.i("SoldierDetailsFragment","Fab click listener -> addTextChangedListener executed");
+            }
+        });
     }
 }

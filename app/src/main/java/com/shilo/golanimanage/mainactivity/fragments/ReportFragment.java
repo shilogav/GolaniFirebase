@@ -1,7 +1,5 @@
 package com.shilo.golanimanage.mainactivity.fragments;
 
-import android.Manifest;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,13 +11,11 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -39,18 +35,16 @@ import android.widget.Toast;
 import com.shilo.golanimanage.R;
 import com.shilo.golanimanage.Utility;
 import com.shilo.golanimanage.databinding.FragmentPlainQuestionListBinding;
-import com.shilo.golanimanage.mainactivity.MainActivityV3;
 import com.shilo.golanimanage.mainactivity.dialog.SaveDialog;
 import com.shilo.golanimanage.mainactivity.model.Question;
 import com.shilo.golanimanage.mainactivity.model.Report;
 import com.shilo.golanimanage.mainactivity.model.Soldier;
+import com.shilo.golanimanage.mainactivity.viewmodel.ReportViewModel;
 import com.shilo.golanimanage.model.LoggedInUser;
-import com.shilo.golanimanage.notification.NotificationView;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.apache.poi.ss.usermodel.DataFormatter;
 
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.Context.MODE_PRIVATE;
@@ -320,7 +314,7 @@ public class ReportFragment extends Fragment implements SaveDialog.SaveDialogLis
     /**
      * create new report
      * @return
-     *///TODO: to accurate the report object and add here the data
+     */
     private List<Question> fillReport() {
         ArrayList<Question> questions = new ArrayList<>();
         if (reportType.equals(PLAIN)) {

@@ -1,11 +1,15 @@
 package com.shilo.golanimanage.mainactivity.model;
 
+import com.shilo.golanimanage.BR;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
 import androidx.annotation.Nullable;
+import androidx.databinding.BaseObservable;
+import androidx.databinding.Bindable;
 
-public class Soldier implements Serializable {
+public class Soldier extends BaseObservable implements Serializable  {
     private String id;
     private String name;
     private long rate;//summery rate
@@ -62,12 +66,14 @@ public class Soldier implements Serializable {
         this.rate = rate;
     }
 
+    @Bindable
     public String getComment() {
         return comment;
     }
 
     public void setComment(String comment) {
         this.comment = comment;
+        notifyPropertyChanged(BR.comment);
     }
 
     @Override

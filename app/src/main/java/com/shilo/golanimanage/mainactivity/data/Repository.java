@@ -103,4 +103,8 @@ public class Repository {
             }
         }).start();
     }
+
+    public MutableLiveData<String> getComment(Soldier soldier) {
+        return dataSource.getComment(soldier);
+    }
 }

@@ -20,7 +20,8 @@
     <string name="soldier_id">תעודת זהות</string>
     <string name="soldier_name">שם החייל</string>
     <string name="soldier_rate">ציון</string>
-    <string name="soldier_comment">הערות</string>
+    <string name="soldier_comment_header">הערות</string>
+    <string name="soldier_comment">רשום הערות על החייל כאן</string>
     <string name="report_plain">דו"ח שטח</string>
     <string name="report_interview">דו"ח ראיון</string>
     <string name="report_retirement">פרישה</string>

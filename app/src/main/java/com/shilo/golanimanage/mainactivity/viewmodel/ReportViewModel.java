@@ -1,4 +1,4 @@
-package com.shilo.golanimanage.mainactivity.fragments;
+package com.shilo.golanimanage.mainactivity.viewmodel;
 
 import android.util.Log;
 
@@ -12,11 +12,9 @@ import androidx.lifecycle.ViewModel;
 public class ReportViewModel extends ViewModel {
     Repository repository;
     Soldier soldier;
-    private MutableLiveData<Report> reportMutableLiveData;
 
     public ReportViewModel() {
         this.repository = Repository.getInstance();
-
     }
 
     public void setSoldier(Soldier soldier) {

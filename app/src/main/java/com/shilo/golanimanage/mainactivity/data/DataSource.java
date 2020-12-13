@@ -22,12 +22,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Transaction;
 import com.shilo.golanimanage.Utility;
+import com.shilo.golanimanage.mainactivity.fragments.SoldierDetailsFragment;
 import com.shilo.golanimanage.mainactivity.livedata.TeamLiveData;
 import com.shilo.golanimanage.mainactivity.model.Question;
 import com.shilo.golanimanage.mainactivity.model.Report;
 import com.shilo.golanimanage.mainactivity.model.Soldier;
 import com.shilo.golanimanage.mainactivity.model.Team;
+import com.shilo.golanimanage.mainactivity.viewmodel.SoldierListViewModel;
 import com.shilo.golanimanage.model.LoggedInUser;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -70,6 +73,7 @@ public class DataSource {
     private MutableLiveData<LoggedInUser> userLiveData;
     private MutableLiveData<List<Soldier>> soldiersLiveData;
     private MutableLiveData<Report> reportLiveData;
+    private MutableLiveData<String> commentLiveData;
     private final DocumentReference[] referencesTemp = new DocumentReference[1];
     private final List<DocumentReference> crewReferenceList = new ArrayList<>();
     private List<Soldier> soldierList = new ArrayList<>();
@@ -91,6 +95,7 @@ public class DataSource {
         teamLiveData = new MutableLiveData<>();
         soldiersLiveData = new MutableLiveData<>();
         reportLiveData = new MutableLiveData<>();
+        commentLiveData = SoldierListViewModel.getCommentLiveData();
         //userLiveData = new MutableLiveData<>();
     }
 
@@ -102,6 +107,8 @@ public class DataSource {
     public void setUserLiveData(MutableLiveData<LoggedInUser> userLiveData) {
         this.userLiveData = userLiveData;
     }
+
+
 
     /**
      * initialize the soldier live data
@@ -772,13 +779,65 @@ public class DataSource {
         }).start();
     }
 
+    public MutableLiveData<String> getComment2(Soldier soldier) {
+        final DocumentReference soldierRef = firebaseFirestore.collection(SOLDIERS_COLLECTION).document(soldier.getId());
+        firebaseFirestore.runTransaction(new Transaction.Function<Object>() {
+            @Nullable
+            @Override
+            public Object apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
+                final DocumentSnapshot snapshot = transaction.get(soldierRef);
+                String temp =(String) snapshot.get("comment");
+                String temp2 = commentLiveData.getValue();
+                Log.d(LOG_NAME, "getComment -> commentLiveData updated from cloud");
+                if (temp != null) {
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            commentLiveData.setValue((String) snapshot.get("comment"));
+                        }
+                    });
 
-    public void deleteSoldier(String id) {
+                }
+                transaction.update(soldierRef, "comment", commentLiveData.getValue());
 
+                // Success
+                return null;
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Object>() {
+            @Override
+            public void onSuccess(Object o) {
+                Log.d(LOG_NAME, "getComment -> Transaction success!");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(LOG_NAME, "getComment -> Transaction failure.", e);
+            }
+        });
+        Log.d(LOG_NAME, "getComment -> method returned result");
+        return commentLiveData;
     }
 
-    private void updateSoldier(String id) {
+    public MutableLiveData<String> getComment(Soldier soldier) {
+        final DocumentReference soldierRef = firebaseFirestore.collection(SOLDIERS_COLLECTION).document(soldier.getId());
+        soldierRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    Log.w(LOG_NAME, "Listen failed.", error);
+                    return;
+                }
 
+                if (value != null && value.exists()) {
+                    Log.d(LOG_NAME, "Current data: " + value.getData());
+                    String comment = (String) value.get("comment");
+                    commentLiveData.setValue(comment);
+                } else {
+                    Log.d(LOG_NAME, "Current data: null");
+                }
+            }
+        });
+        return commentLiveData;
     }
 
 
