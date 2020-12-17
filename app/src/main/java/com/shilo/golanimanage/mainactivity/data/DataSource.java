@@ -332,9 +332,6 @@ public class DataSource {
     }
 
 
-
-
-
     private void getUserFromCloud(String username) {
         firebaseFirestore.collection("users")
                 .whereEqualTo("name", username)
